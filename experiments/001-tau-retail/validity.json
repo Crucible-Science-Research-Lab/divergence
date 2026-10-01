@@ -1,0 +1,103 @@
+{
+ "rule": "Before any hypothesis is scored, the importer compares each selected task's gold state-changing actions in the results file with the same task at source.commit. Tasks whose gold actions changed since the runs were graded are marked grader-suspect: shown in the river, excluded from H1, H3 and H5 counts, and listed in the note. (A pre-scoring look on 30 Sep found task 18's gold exchange target was corrected after these runs; it is expected to be excluded.)\n",
+ "checked_against": "experiments/001-tau-retail/raw/retail_tasks_5bfa7e37.json",
+ "commit": "5bfa7e37b36656b37dc6d022156be6563c1007f3",
+ "tasks": {
+  "36": {
+   "status": "ok",
+   "gold_writes_changed": false,
+   "scenario_changed": false
+  },
+  "62": {
+   "status": "ok",
+   "gold_writes_changed": false,
+   "scenario_changed": true
+  },
+  "59": {
+   "status": "ok",
+   "gold_writes_changed": false,
+   "scenario_changed": false
+  },
+  "37": {
+   "status": "ok",
+   "gold_writes_changed": false,
+   "scenario_changed": false
+  },
+  "100": {
+   "status": "ok",
+   "gold_writes_changed": false,
+   "scenario_changed": true
+  },
+  "105": {
+   "status": "ok",
+   "gold_writes_changed": false,
+   "scenario_changed": false
+  },
+  "19": {
+   "status": "ok",
+   "gold_writes_changed": false,
+   "scenario_changed": false
+  },
+  "112": {
+   "status": "ok",
+   "gold_writes_changed": false,
+   "scenario_changed": false
+  },
+  "43": {
+   "status": "ok",
+   "gold_writes_changed": false,
+   "scenario_changed": false
+  },
+  "57": {
+   "status": "ok",
+   "gold_writes_changed": false,
+   "scenario_changed": false
+  },
+  "50": {
+   "status": "ok",
+   "gold_writes_changed": false,
+   "scenario_changed": false
+  },
+  "25": {
+   "status": "ok",
+   "gold_writes_changed": false,
+   "scenario_changed": false
+  },
+  "18": {
+   "status": "grader_suspect",
+   "gold_writes_changed": true,
+   "scenario_changed": true,
+   "gold_writes_then": [
+    "exchange_delivered_order_items {\"item_ids\": [\"8069050545\"], \"new_item_ids\": [\"8069050545\"], \"order_id\": \"#W2890441\", \"payment_method_id\": \"credit_card_1061405\"}"
+   ],
+   "gold_writes_now": [
+    "exchange_delivered_order_items {\"item_ids\": [\"8069050545\"], \"new_item_ids\": [\"1071497737\"], \"order_id\": \"#W2890441\", \"payment_method_id\": \"credit_card_1061405\"}"
+   ]
+  },
+  "47": {
+   "status": "ok",
+   "gold_writes_changed": false,
+   "scenario_changed": false
+  },
+  "27": {
+   "status": "ok",
+   "gold_writes_changed": false,
+   "scenario_changed": false
+  },
+  "111": {
+   "status": "ok",
+   "gold_writes_changed": false,
+   "scenario_changed": false
+  },
+  "88": {
+   "status": "ok",
+   "gold_writes_changed": false,
+   "scenario_changed": false
+  },
+  "10": {
+   "status": "ok",
+   "gold_writes_changed": false,
+   "scenario_changed": true
+  }
+ }
+}

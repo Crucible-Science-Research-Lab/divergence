@@ -1,0 +1,21 @@
+.env
+divenv/
+runs/
+__pycache__/
+*.duckdb
+
+# Source data is downloaded by each experiment's fetch_raw.sh, never committed
+experiments/*/raw/
+ 
+# Working files that never go public
+*.duckdb
+.env
+.env.*
+ 
+# Python and OS clutter
+__pycache__/
+*.pyc
+.venv/
+venv/
+.DS_Store
+ 

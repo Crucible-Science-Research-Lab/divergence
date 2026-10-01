@@ -1,0 +1,54 @@
+{
+ "importer": "divergence.importers.tau 0.1.0",
+ "encoder": "trace.py",
+ "imported_at": "2026-10-01T11:01:23+00:00",
+ "source": {
+  "repo": "https://github.com/sierra-research/tau2-bench",
+  "commit": "5bfa7e37b36656b37dc6d022156be6563c1007f3",
+  "path": "data/tau2/results/final/",
+  "licence": "MIT",
+  "downloaded": "2026-09-29",
+  "evaluator_commit": "c30d59aaa71c65f9b9eb6a8f8636b48945028fcf"
+ },
+ "files": [
+  {
+   "file": "gpt-4.1-2025-04-14_retail_default_gpt-4.1-2025-04-14_4trials.json",
+   "model": "gpt-4.1-2025-04-14",
+   "sha256": "5fc5b96ada0fe46a463eaed98d1bfed9947fe073bac052290162dae18d71394e",
+   "runs_imported": 72
+  },
+  {
+   "file": "claude-3-7-sonnet-20250219_retail_default_gpt-4.1-2025-04-14_4trials.json",
+   "model": "claude-3-7-sonnet-20250219",
+   "sha256": "ed41dbd18c080154156484e3a0122c095e324a11367a640d88e15956daed7b9d",
+   "runs_imported": 72
+  },
+  {
+   "file": "o4-mini-2025-04-16_retail_default_gpt-4.1-2025-04-14_4trials.json",
+   "model": "o4-mini-2025-04-16",
+   "sha256": "7135f38bbbbd46d6babe830574c8623bb276d8fd6da316580b905cf513853f98",
+   "runs_imported": 72
+  }
+ ],
+ "tasks": [
+  "36",
+  "62",
+  "59",
+  "37",
+  "100",
+  "105",
+  "19",
+  "112",
+  "43",
+  "57",
+  "50",
+  "25",
+  "18",
+  "47",
+  "27",
+  "111",
+  "88",
+  "10"
+ ],
+ "runs": 216
+}

@@ -1,0 +1,577 @@
+<!doctype html>
+<!-- viewer/index.html — divergence viewer v0.3 -->
+<!--
+  Dumb reader. Reads experiments/<exp>/analysis.json and renders what the
+  analysis already computed. No analysis happens here. Nothing leaves your machine.
+
+  Serve from the repo root:   python -m http.server
+  Open:                       http://localhost:8000/viewer/?exp=001-tau-retail
+  Exhibit view:               ...&cell=<cell_id>&export=1   (tree + tool key only, 1200 px)
+  Light theme (for print):    ...&theme=light
+  Or drop an analysis.json onto the page.
+
+  Three zoom levels
+    shape  the trajectory tree for one (task, model) cell: thickness = runs; each
+           step is numbered, and the tool key under the tree gives its full name.
+           With verdicts (contract 0.2) endings are teal for passed, red for failed;
+           without them, red only where a run never finished
+    path   click a branch or an ending: those runs light up, listed below
+    step   click a run (up to two): turn-by-turn tokens and the final answer,
+           side by side, with their threads drawn through the tree
+
+  v0.3: tool key replaces truncated step labels; hide-sidebar toggle; exhibit view
+  (export=1); Crucible Science palette; "river" renamed "trajectory tree".
+  v0.2: pass/fail endings, cost in dollars, flipping cells first, model filter,
+  hypotheses panel, same-path-different-outcome marker. Reads contract 0.1 too.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>divergence</title>
+<style>
+:root{
+  /* Crucible Science palette: charcoal ground, white text, gold accents, orange nodes */
+  --bg:#16120e; --panel:#1c1712; --fg:#ede6da; --muted:#a0968a; --line:#2f271f;
+  --gold:#c8a45e; --orange:#e05500;
+  --band:#3a3027; --band-hi:#b5aa9b; --end:#8a7f72; --fail:#d4566a; --pass:#3fa89f;
+  --thread:#ede6da; --sel:#241d17;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif;
+}
+:root[data-theme="light"]{
+  --bg:#ede6da; --panel:#f6f1e8; --fg:#16120e; --muted:#6b6155; --line:#d8cebd;
+  --gold:#8f6f2e; --orange:#c94c00;
+  --band:#d6c9b3; --band-hi:#7d7263; --end:#7a6f62; --fail:#b8394d; --pass:#2b847c;
+  --thread:#16120e; --sel:#e4dccd;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.45 var(--sans)}
+.app{display:grid;grid-template-columns:300px minmax(0,1fr);min-height:100vh}
+.app.noside{grid-template-columns:minmax(0,1fr)}
+.app.noside aside{display:none}
+aside{border-right:1px solid var(--line);background:var(--panel);padding:18px 16px;overflow-y:auto;max-height:100vh;position:sticky;top:0}
+main{padding:20px 24px;min-width:0}
+h1{font-size:13px;margin:0 0 2px;font-weight:650;letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+h2{font-size:18px;margin:0 0 4px;font-weight:650}
+h3{font-size:12px;margin:18px 0 8px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--gold)}
+.muted{color:var(--muted)}
+.small{font-size:12px}
+.badge{display:inline-block;font-size:11px;padding:1px 7px;border-radius:9px;border:1px solid var(--line);color:var(--muted);margin-left:6px;vertical-align:1px;white-space:nowrap}
+.badge.fail{border-color:var(--fail);color:var(--fail)}
+.badge.pass{border-color:var(--pass);color:var(--pass)}
+.q{margin:10px 0 0;font-size:13px}
+select{font:12px var(--sans);color:var(--fg);background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:4px 6px;width:100%}
+.cells{list-style:none;margin:0;padding:0}
+.cells li{padding:7px 8px;border-radius:6px;cursor:pointer;margin-bottom:2px}
+.cells li:hover{background:var(--sel)}
+.cells li.on{background:var(--sel);box-shadow:inset 2px 0 0 var(--gold)}
+.cells .t{font-weight:560;font-size:13px}
+.cells .m{font-size:12px;color:var(--muted);font-family:var(--mono)}
+.dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--orange);margin-left:6px;vertical-align:1px}
+details{margin-top:14px;font-size:12px;color:var(--muted)}
+details summary{cursor:pointer;color:var(--fg)}
+details ul{padding-left:16px;margin:6px 0}
+.hyp{font-size:12px;margin:6px 0 0}
+.hyp div{padding:5px 0;border-bottom:1px solid var(--line)}
+.hyp b{font-family:var(--mono);font-weight:600;color:var(--gold)}
+.hyp .v{font-size:11px;text-transform:uppercase;letter-spacing:.04em;margin-left:6px}
+.hyp .v.supported{color:var(--pass)} .hyp .v.killed{color:var(--fail)} .hyp .v.mixed{color:var(--muted)}
+.head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.tog{font:12px var(--sans);color:var(--muted);background:transparent;border:1px solid var(--line);border-radius:6px;padding:4px 10px;cursor:pointer;white-space:nowrap}
+.tog:hover{color:var(--fg);border-color:var(--gold)}
+.stats{display:flex;flex-wrap:wrap;gap:6px 18px;margin:8px 0 4px;font-size:13px}
+.stats b{font-weight:620}
+.note{font-size:12px;margin:6px 0 0;padding:6px 10px;border-left:2px solid var(--line);color:var(--muted)}
+.note.warn{border-color:var(--orange)}
+.guide{font-size:12px;color:var(--muted);margin:4px 0 12px}
+.tree{background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.tree .scroll{overflow-x:auto;overflow-y:hidden}
+.tree svg{display:block}
+.rib{fill:var(--band);opacity:.75;cursor:pointer;transition:opacity .12s}
+.rib:hover{opacity:1}
+.rib.fail{fill:var(--fail);opacity:.35}
+.rib.pass{fill:var(--pass);opacity:.35}
+.node{fill:var(--band-hi);cursor:pointer}
+.node.end{fill:var(--end)}
+.node.fail{fill:var(--fail)}
+.node.pass{fill:var(--pass)}
+.node.picked{stroke:var(--fg);stroke-width:1.5}
+.dim{opacity:.12 !important}
+.lbl{font:11px var(--mono);fill:var(--muted);pointer-events:none}
+.lbl.code{fill:var(--gold);font-weight:600}
+.lbl.end{fill:var(--fg)}
+.lbl.fail{fill:var(--fail)}
+.lbl.pass{fill:var(--pass)}
+.thread{fill:none;stroke:var(--thread);stroke-width:2;pointer-events:none}
+.thread.b{stroke-dasharray:5 4}
+.key{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:4px 18px;list-style:none;margin:0;padding:10px 14px 12px;border-top:1px solid var(--line);font:12px var(--mono);color:var(--muted)}
+.key b{color:var(--gold);display:inline-block;min-width:24px;font-weight:600}
+.key .sw{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:10px;vertical-align:-1px}
+.key .sw.pass{background:var(--pass)} .key .sw.fail{background:var(--fail)}
+.lower{display:grid;grid-template-columns:minmax(280px,1fr) minmax(0,1.6fr);gap:20px;margin-top:18px}
+.runs{background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.runs .hd{padding:8px 12px;border-bottom:1px solid var(--line);font-size:12px;color:var(--muted)}
+.run{padding:8px 12px;border-bottom:1px solid var(--line);cursor:pointer;font-size:12px}
+.run:last-child{border-bottom:0}
+.run:hover{background:var(--sel)}
+.run.on{background:var(--sel);box-shadow:inset 2px 0 0 var(--gold)}
+.run .top{display:flex;justify-content:space-between;gap:8px;font-family:var(--mono)}
+.run .path{color:var(--muted);margin-top:3px;word-break:break-word}
+.cmp{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px 14px;min-width:0}
+.card h4{margin:0 0 6px;font-size:13px;font-family:var(--mono);font-weight:600}
+.card .kv{font-size:12px;color:var(--muted);margin-bottom:8px;font-family:var(--mono)}
+table{width:100%;border-collapse:collapse;font:12px var(--mono)}
+td,th{text-align:left;padding:3px 6px 3px 0;border-bottom:1px solid var(--line)}
+th{color:var(--muted);font-weight:500}
+td.n,th.n{text-align:right}
+tr.fail td{color:var(--fail)}
+tr.pass td{color:var(--pass)}
+pre{white-space:pre-wrap;word-break:break-word;font:12px/1.5 var(--mono);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:8px 10px;max-height:260px;overflow:auto;margin:6px 0 0}
+.empty{max-width:560px;margin:12vh auto;text-align:center;padding:40px 24px;border:1.5px dashed var(--line);border-radius:12px;background:var(--panel)}
+.empty code{font-family:var(--mono);font-size:12px}
+.hint{font-size:12px;color:var(--muted);padding:14px}
+.brand{display:none;margin-top:10px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
+body.drag .empty, body.drag .tree{outline:2px dashed var(--gold);outline-offset:4px}
+/* exhibit view: tree and key only, fixed width for consistent PNGs */
+body.export .app{display:block}
+body.export main{width:1200px;padding:24px 28px}
+body.export .tog, body.export .lower, body.export .guide, body.export .note{display:none}
+body.export .brand{display:block}
+@media (max-width: 860px){
+  .app{grid-template-columns:1fr}
+  aside{position:static;max-height:none;border-right:0;border-bottom:1px solid var(--line)}
+  main{padding:16px}
+  .lower{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="app" id="app" hidden>
+  <aside id="side"></aside>
+  <main id="main"></main>
+</div>
+<div class="empty" id="empty" hidden>
+  <h2>divergence</h2>
+  <p class="muted" id="emptyMsg">Drop an <code>analysis.json</code> here.</p>
+  <p class="small muted">Or serve the repo root with <code>python -m http.server</code> and open
+  <code>/viewer/?exp=001-tau-retail</code>. Nothing leaves your machine.</p>
+</div>
+
+<script>
+const U = 20, GAP = 18, NODEW = 10, PADX = 28, PADY = 30, ENDLBL = 220;
+let COLW = 110;   // fitted to the panel on every render, so endings stay on screen
+const X = d => PADX + d * COLW;
+const params = new URLSearchParams(location.search);
+const S = { data: null, cell: null, sel: null, compare: [], model: 'all',
+            exp: params.get('export') === '1', side: params.get('export') !== '1' };
+if (params.get('theme') === 'light') document.documentElement.dataset.theme = 'light';
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const short = m => String(m).split('/').pop();
+const fmt = n => Number(n).toLocaleString('en-US');
+const usd = n => n == null ? '' : '$' + (n < 0.1 ? Number(n).toFixed(4) : Number(n).toFixed(2));
+const runNo = id => { const m = String(id).match(/(\d+)$/); return m ? '#' + Number(m[1]) : id; };
+const hasV = () => !!S.data?.meta?.has_verdicts;
+const endKind = step => step === 'END:pass' ? 'pass' : step === 'END:fail' ? 'fail' : null;
+
+function compress(t) {
+  const out = [];
+  for (const s of t) { const l = out[out.length - 1]; if (l && l.s === s) l.k++; else out.push({ s, k: 1 }); }
+  return out.map(o => o.k > 1 ? `${o.s} ×${o.k}` : o.s).join(' → ');
+}
+
+function applyLayout() {
+  document.body.classList.toggle('export', S.exp);
+  $('#app').classList.toggle('noside', !S.side);
+}
+
+// ── layout: the analysis gives the tree; the viewer only places it ──────────
+function prep(cell) {
+  if (cell._p) return cell._p;
+  const nodes = {};
+  cell.tree.nodes.forEach(n => nodes[n.id] = { ...n });
+  const measure = nd => {
+    nd.kids = nd.children.map(c => nodes[c]).sort((a, b) => b.n - a.n || a.id - b.id);
+    let s = 0;
+    nd.kids.forEach((k, i) => { s += measure(k) + (i ? GAP : 0); });
+    nd.kidsH = s;
+    nd.H = Math.max(nd.n * U, s);
+    return nd.H;
+  };
+  const place = (nd, top) => {
+    nd.y = top + (nd.H - nd.n * U) / 2;
+    let t = top + (nd.H - nd.kidsH) / 2;
+    nd.kids.forEach(k => { place(k, t); t += k.H + GAP; });
+  };
+  const order = nd => {
+    nd.order = nd.kids.length ? nd.kids.flatMap(order) : [...nd.run_ids];
+    return nd.order;
+  };
+  const root = nodes[0];
+  measure(root); place(root, PADY); order(root);
+
+  const chain = {};
+  const walk = (nd, path) => {
+    const p = [...path, nd];
+    if (!nd.kids.length) nd.run_ids.forEach(r => chain[r] = p);
+    nd.kids.forEach(k => walk(k, p));
+  };
+  walk(root, []);
+
+  // tool key: number each distinct tool in the order it first appears, breadth first
+  const codes = {};
+  let next = 1;
+  const queue = [root];
+  while (queue.length) {
+    const nd = queue.shift();
+    if (nd.depth > 0 && !nd.is_end && !(nd.step in codes)) codes[nd.step] = next++;
+    queue.push(...nd.kids);
+  }
+
+  const maxDepth = Math.max(...Object.values(nodes).map(n => n.depth));
+  const runs = {};
+  cell.runs.forEach(r => runs[r.id] = r);
+  cell._p = { nodes, root, chain, runs, codes, maxDepth, height: root.H + PADY * 2 };
+  return cell._p;
+}
+
+const slotY = (nd, rid) => nd.y + nd.order.indexOf(rid) * U + U / 2;
+
+function activeSet(P) {
+  if (S.sel != null) return new Set(P.nodes[S.sel].run_ids);
+  if (S.compare.length) return new Set(S.compare);
+  return null;
+}
+
+// ── shape: the trajectory tree ───────────────────────────────────────────────
+function fitColumns(P) {
+  const avail = ($('#main')?.clientWidth || 1000) - 50;
+  COLW = Math.max(40, Math.min(110, (avail - PADX - NODEW - ENDLBL) / Math.max(P.maxDepth, 1)));
+}
+
+function treeSvg(cell) {
+  const P = prep(cell), act = activeSet(P);
+  fitColumns(P);
+  const width = X(P.maxDepth) + NODEW + ENDLBL;
+  const on = ids => !act || ids.some(i => act.has(i));
+  let ribs = '', nodes = '', lbls = '', threads = '';
+
+  Object.values(P.nodes).forEach(nd => {
+    let off = 0;
+    nd.kids.forEach(k => {
+      const x1 = X(nd.depth) + NODEW, x2 = X(k.depth), xm = (x1 + x2) / 2;
+      const ya = nd.y + off * U, yb = k.y, h = k.n * U;
+      off += k.n;
+      const d = `M${x1},${ya}C${xm},${ya} ${xm},${yb} ${x2},${yb}L${x2},${yb + h}C${xm},${yb + h} ${xm},${ya + h} ${x1},${ya + h}Z`;
+      const ek = k.is_end ? endKind(k.step) : null;
+      const cls = k.failure ? ' fail' : ek === 'pass' ? ' pass' : '';
+      ribs += `<path class="rib${cls}${on(k.run_ids) ? '' : ' dim'}" d="${d}" data-node="${k.id}"><title>${esc(k.step)} · ${k.n} run${k.n > 1 ? 's' : ''}</title></path>`;
+    });
+
+    const ek = nd.is_end ? endKind(nd.step) : null;
+    const cls = nd.is_end ? (nd.failure ? 'node end fail' : ek === 'pass' ? 'node end pass' : 'node end') : 'node';
+    nodes += `<rect class="${cls}${on(nd.run_ids) ? '' : ' dim'}${S.sel === nd.id ? ' picked' : ''}" x="${X(nd.depth)}" y="${nd.y}" width="${NODEW}" height="${nd.n * U}" rx="2" data-node="${nd.id}"><title>${esc(nd.step)} · ${nd.n} run${nd.n > 1 ? 's' : ''}</title></rect>`;
+
+    if (nd.depth === 0) {
+        lbls += `<text class="lbl" x="${X(0)}" y="${nd.y + nd.n * U + 14}">start · ${nd.n} runs</text>`;
+    } else if (nd.is_end) {
+      const term = nd.step.replace(/^END:/, '');
+      let txt, lc = '';
+      if (ek === 'pass') { txt = `passed ×${nd.n}`; lc = ' pass'; }
+      else if (ek === 'fail') { txt = `failed ×${nd.n}`; lc = ' fail'; }
+      else if (nd.failure) { txt = `never finished (${term}) ×${nd.n}`; lc = ' fail'; }
+      else txt = `${term} ×${nd.n}`;
+      lbls += `<text class="lbl end${lc}" x="${X(nd.depth) + NODEW + 6}" y="${nd.y + nd.n * U / 2 + 4}">${esc(txt)}</text>`;
+    } else {
+      lbls += `<text class="lbl code" text-anchor="middle" x="${X(nd.depth) + NODEW / 2}" y="${nd.y - 6}">${P.codes[nd.step]}</text>`;
+    }
+  });
+
+  S.compare.forEach((rid, i) => {
+    const ch = P.chain[rid];
+    if (!ch) return;
+    let d = '';
+    ch.forEach((nd, j) => {
+      const y = slotY(nd, rid), xl = X(nd.depth), xr = xl + NODEW;
+      if (j === 0) d += `M${xl},${y}L${xr},${y}`;
+      else {
+        const prev = ch[j - 1], py = slotY(prev, rid), px = X(prev.depth) + NODEW, xm = (px + xl) / 2;
+        d += `C${xm},${py} ${xm},${y} ${xl},${y}L${xr},${y}`;
+      }
+    });
+    threads += `<path class="thread${i ? ' b' : ''}" d="${d}"/>`;
+  });
+
+  return `<svg width="${width}" height="${P.height}" viewBox="0 0 ${width} ${P.height}" id="svg">${ribs}${nodes}${threads}${lbls}</svg>`;
+}
+
+function toolKey(cell) {
+  const P = prep(cell);
+  const tools = Object.entries(P.codes).map(([step, c]) => `<li><b>${c}</b>${esc(step)}</li>`).join('');
+  const ends = hasV() ? `<li><span class="sw pass"></span>passed</li><li><span class="sw fail"></span>failed</li>` : '';
+  return `<ul class="key">${tools}${ends}</ul>`;
+}
+
+// ── path: runs list ──────────────────────────────────────────────────────────
+function verdictBadge(r) {
+  if (r.verdict === 'pass') return `<span class="badge pass">passed</span>`;
+  if (r.verdict === 'fail') return `<span class="badge fail">failed</span>`;
+  return r.failure ? `<span class="badge fail">${esc(r.termination)}</span>` : '';
+}
+
+function runList(cell) {
+  const P = prep(cell);
+  const ids = S.sel != null ? P.nodes[S.sel].run_ids : cell.runs.map(r => r.id);
+  const scope = S.sel != null ? `${ids.length} run${ids.length > 1 ? 's' : ''} through <b>${esc(P.nodes[S.sel].step)}</b>` : `all ${ids.length} runs`;
+  const rows = ids.map(id => P.runs[id]).sort((a, b) => a.in_tok - b.in_tok).map(r => `
+    <div class="run${S.compare.includes(r.id) ? ' on' : ''}" data-run="${esc(r.id)}">
+      <div class="top"><span>${runNo(r.id)} · ${r.turns} turns${r.cost_usd != null ? ' · ' + usd(r.cost_usd) : ''}</span><span>${fmt(r.in_tok)} in / ${fmt(r.out_tok)} out</span></div>
+      <div class="path">${esc(compress(r.trajectory)) || '<i>no tool calls</i>'}${verdictBadge(r)}</div>
+    </div>`).join('');
+  return `<div class="runs"><div class="hd">${scope} · click up to two to compare</div>${rows}</div>`;
+}
+
+// ── step: turn-by-turn ───────────────────────────────────────────────────────
+function runCard(r, i) {
+  const n = Math.max(r.trajectory.length, 0);
+  const rows = r.trajectory.map((s, t) => `<tr><td>${t + 1}</td><td>${esc(s)}</td></tr>`).join('');
+  const endCls = r.verdict === 'pass' ? 'pass' : (r.failure ? 'fail' : '');
+  const endTxt = r.verdict ? `${r.verdict === 'pass' ? 'passed' : 'failed'} · ended ${esc(r.termination)}` : `ended: ${esc(r.termination)}`;
+  const turnRows = r.in_turn.map((v, t) => `<tr><td>${t + 1}</td><td class="n">${fmt(v)}</td><td class="n">${r.out_turn[t] != null ? fmt(r.out_turn[t]) : ''}</td></tr>`).join('');
+  return `<div class="card">
+    <h4>${runNo(r.id)}${i ? ' <span class="muted">(dashed)</span>' : ' <span class="muted">(solid)</span>'}${verdictBadge(r) || `<span class="badge">${esc(r.termination)}</span>`}</h4>
+    <div class="kv">${r.turns} turns · ${fmt(r.in_tok)} in · ${fmt(r.out_tok)} out${r.cost_usd != null ? ' · ' + usd(r.cost_usd) : ''}${r.handoff ? ' · handed off' : ''}</div>
+    <table><tr><th>step</th><th>tool call</th></tr>${rows || '<tr><td colspan="2" class="muted">no tool calls</td></tr>'}<tr class="${endCls}"><td>${n + 1}</td><td>${endTxt}</td></tr></table>
+    <details><summary>tokens per agent turn</summary><table><tr><th>turn</th><th class="n">in</th><th class="n">out</th></tr>${turnRows}</table></details>
+    <h3>final answer</h3>
+    <pre>${esc(r.final_answer || '(none recorded)')}</pre>
+    <div class="small muted" style="margin-top:6px">${esc(r.trace_path)}</div>
+  </div>`;
+}
+
+function compareView(cell) {
+  const P = prep(cell);
+  if (!S.compare.length) return `<div class="card hint">Pick a run on the left to see it step by step. Pick a second to put them side by side.</div>`;
+  return `<div class="cmp">${S.compare.map((id, i) => runCard(P.runs[id], i)).join('')}</div>`;
+}
+
+// ── sidebar ──────────────────────────────────────────────────────────────────
+function visibleCells() {
+  return S.data.cells.filter(c => S.model === 'all' || c.model === S.model);
+}
+
+function sortedCells() {
+  const v = hasV();
+  return [...visibleCells()].sort((a, b) => {
+    const sa = a.summary, sb = b.summary;
+    if (v && !!sa.outcome_flip !== !!sb.outcome_flip) return sb.outcome_flip - sa.outcome_flip;
+    const da = sa.distinct_paths > 1, db = sb.distinct_paths > 1;
+    if (da !== db) return db - da;
+    const ka = v ? (sa.cost_ratio || sa.in_tok_ratio || 0) : (sa.in_tok_ratio || 0);
+    const kb = v ? (sb.cost_ratio || sb.in_tok_ratio || 0) : (sb.in_tok_ratio || 0);
+    return kb - ka;
+  });
+}
+
+function hypothesesPanel() {
+  const h = S.data.hypotheses;
+  if (!h) return '';
+  const line = (k, txt) => h[k] ? `<div><b>${k}</b><span class="v ${esc(h[k].verdict)}">${esc(h[k].verdict)}</span><br>${txt}</div>` : '';
+  const pm = o => Object.entries(o || {}).map(([m, v]) => `${esc(short(m))} ${v.flips ?? v.tasks_2x}/${v.of}${v.max_ratio ? `, max ×${v.max_ratio}` : ''}`).join(' · ');
+  const body = [
+    line('H1', `tasks that flip pass/fail: ${pm(h.H1?.per_model)}`),
+    line('H2', `first split: ${esc(Object.entries(h.H2?.counts || {}).map(([k, v]) => `${k.replace(/_/g, ' ')} ${v}`).join(', '))}`),
+    line('H3', `pass/fail pairs share ${h.H3?.pass_fail_mean} steps before parting, pass/pass pairs ${h.H3?.pass_pass_mean}`),
+    line('H4', `tasks costing 2x+ on one run: ${pm(h.H4?.per_model)}`),
+    line('H5', `same path, different outcome: ${esc((h.H5?.cells || []).map(c => c.cell_id).join(', ') || 'none')}`),
+  ].join('');
+  const excl = (h.excluded_grader_suspect || []).length ? `<div class="muted">excluded as grader-suspect: task ${esc(h.excluded_grader_suspect.join(', '))}</div>` : '';
+  return `<details open><summary>Hypotheses (scored on ${esc((h.scored_on || []).map(short).join(', '))})</summary><div class="hyp">${body}${excl}</div></details>`;
+}
+
+function perModelPanel() {
+  const pm = S.data.per_model;
+  if (!pm || !hasV()) return '';
+  const role = m => S.data.meta?.model_roles?.[m];
+  const rows = Object.entries(pm).map(([m, s]) => `<tr><td>${esc(short(m))}${role(m) === 'exploration' ? ' <span class="muted">(expl.)</span>' : ''}</td><td class="n">${s.pass_rate != null ? Math.round(s.pass_rate * 100) + '%' : ''}</td><td class="n">${s.flipping_cells}/${s.cells}</td><td class="n">×${s.max_cost_ratio ?? ''}</td></tr>`).join('');
+  return `<details><summary>Per model</summary><table><tr><th>model</th><th class="n">pass</th><th class="n">flip</th><th class="n">cost</th></tr>${rows}</table></details>`;
+}
+
+function renderSide() {
+  const m = S.data.meta || {};
+  const v = hasV();
+  const lim = (m.limitations || []).map(l => `<li>${esc(l)}</li>`).join('');
+  const roles = m.model_roles || {};
+  const models = m.models || [];
+  const opts = [`<option value="all">all models (${S.data.cells.length} cells)</option>`]
+    .concat(models.map(x => `<option value="${esc(x)}"${S.model === x ? ' selected' : ''}>${esc(short(x))}${roles[x] ? ` · ${roles[x]}` : ''}</option>`)).join('');
+  const items = sortedCells().map(c => {
+    const s = c.summary;
+    const mark = v ? s.outcome_flip : (c.runs || []).some(r => r.failure);
+    const vt = s.verdicts ? ` · ${s.verdicts.pass}/${s.n} pass` : '';
+    const cr = s.cost_ratio && s.cost_ratio > 1.05 ? ` · $×${s.cost_ratio}` : (s.in_tok_ratio && s.in_tok_ratio > 1.05 ? ` · ×${s.in_tok_ratio}` : '');
+    const tags = [
+      s.task_group ? `<span class="badge">${esc(s.task_group)}</span>` : '',
+      s.task_validity === 'grader_suspect' ? '<span class="badge fail">grader-suspect</span>' : '',
+      (s.same_path_diff_outcome || []).length ? '<span class="badge fail" title="same tools, same order, different outcome">same path ≠ outcome</span>' : '',
+    ].join('');
+    return `<li class="${c.cell_id === S.cell ? 'on' : ''}" data-cell="${esc(c.cell_id)}">
+      <div class="t">task ${esc(c.task)}${mark ? `<span class="dot" title="${v ? 'outcome flips across identical runs' : 'has runs that never finished'}"></span>` : ''}${tags}</div>
+      <div class="m">${esc(short(c.model))}${roles[c.model] === 'exploration' ? ' (expl.)' : ''} · ${s.distinct_paths} path${s.distinct_paths > 1 ? 's' : ''}${vt}${cr}</div>
+    </li>`;
+  }).join('');
+  $('#side').innerHTML = `
+    <h1>divergence</h1>
+    <div class="small muted">${esc(m.slug || '')}${m.status ? `<span class="badge">${esc(m.status)}</span>` : ''}</div>
+    ${m.question ? `<p class="q">${esc(m.question)}</p>` : ''}
+    <div class="small muted" style="margin-top:8px">${m.n_runs ?? ''} runs · ${models.length} model${models.length > 1 ? 's' : ''} · temp ${m.temperature ?? '?'} · step = ${esc(m.step_key || '?')}</div>
+    ${hypothesesPanel()}
+    ${perModelPanel()}
+    <h3>cells${v ? ' · flipping first' : ''}</h3>
+    ${models.length > 1 ? `<div style="margin-bottom:8px"><select id="modelSel">${opts}</select></div>` : ''}
+    <ul class="cells">${items}</ul>
+    ${lim ? `<details><summary>Limitations</summary><ul>${lim}</ul></details>` : ''}`;
+}
+
+// ── main ─────────────────────────────────────────────────────────────────────
+function renderMain() {
+  const cell = S.data.cells.find(c => c.cell_id === S.cell);
+  if (!cell) { $('#main').innerHTML = ''; return; }
+  const s = cell.summary, v = hasV();
+  const terms = Object.entries(s.terminations || {}).map(([k, n]) => `${esc(k)} ${n}`).join(', ');
+  const roles = S.data.meta?.model_roles || {};
+  const cost = s.cost_usd ? `<span>cost <b>${usd(s.cost_usd.min)}–${usd(s.cost_usd.max)}</b>${s.cost_ratio && s.cost_ratio > 1.05 ? ` (×${s.cost_ratio})` : ''}</span>` : '';
+  const vt = s.verdicts ? `<span><b>${s.verdicts.pass}</b> passed · <b>${s.verdicts.fail}</b> failed${s.outcome_flip ? ' <span class="badge fail">outcome flips</span>' : ''}</span>` : '';
+  const kind = s.first_split_kind ? ` (${esc(s.first_split_kind.replace(/_/g, ' '))})` : '';
+  const notes = [];
+  if (s.task_validity === 'grader_suspect') notes.push(`<div class="note warn">Grader-suspect task: its expected actions were corrected after these runs were graded, so pass/fail here may reflect the grader, not the agent. Shown, but excluded from hypothesis counts.</div>`);
+  (s.same_path_diff_outcome || []).forEach(g => notes.push(`<div class="note warn">Same path, different outcome: runs ${esc(g.pass_runs.map(runNo).join(', '))} passed and ${esc(g.fail_runs.map(runNo).join(', '))} failed after calling the same tools in the same order. The difference is in the arguments or the conversation, not the path.</div>`));
+  if (roles[cell.model] === 'exploration') notes.push(`<div class="note">Exploration model: tasks were selected on this model's behaviour, so it is not used to score hypotheses.</div>`);
+  const guide = v
+    ? 'Trajectory tree: every run enters on the left. Branches split where runs call a different tool; thickness is the number of runs. Numbers on the tree refer to the tool key below it. Endings are teal where the run passed and red where it failed. Click a branch to follow it, click empty space to reset.'
+    : 'Trajectory tree: every run enters on the left. Branches split where runs call a different tool; thickness is the number of runs. Numbers on the tree refer to the tool key below it. Red marks runs that never finished. Click a branch to follow it, click empty space to reset.';
+  $('#main').innerHTML = `
+    <div class="head">
+      <h2>task ${esc(cell.task)} <span class="muted" style="font-weight:500">/ ${esc(short(cell.model))}${s.task_group ? ` · ${esc(s.task_group)}` : ''}</span></h2>
+      <button class="tog" id="togSide" type="button">${S.side ? 'Hide sidebar' : 'Show sidebar'}</button>
+    </div>
+    <div class="stats">
+      <span><b>${s.n}</b> runs</span>
+      ${vt}
+      <span><b>${s.distinct_paths}</b> distinct path${s.distinct_paths > 1 ? 's' : ''}</span>
+      <span>first split ${s.first_split_step == null ? '<b>none</b>' : s.first_split_step === 0 ? `at the <b>first step</b>${kind}` : `after step <b>${s.first_split_step}</b>${kind}`}</span>
+      ${S.exp ? '' : cost}
+      ${S.exp ? '' : `<span>input tokens <b>${fmt(s.in_tok.min)}–${fmt(s.in_tok.max)}</b>${s.in_tok_ratio && s.in_tok_ratio > 1.05 ? ` (×${s.in_tok_ratio})` : ''}</span>`}
+      ${s.handoffs ? `<span><b>${s.handoffs}</b> handed off</span>` : ''}
+      ${v ? '' : `<span class="muted">${terms}</span>`}
+      ${s.missing_indices && s.missing_indices.length ? `<span class="muted">missing runs ${s.missing_indices.join(', ')}</span>` : ''}
+    </div>
+    ${notes.join('')}
+    <div class="guide">${guide}</div>
+    <div class="tree" id="tree"><div class="scroll">${treeSvg(cell)}</div>${toolKey(cell)}</div>
+    <div class="brand">Crucible Science · divergence · ${esc(S.data.meta?.slug || '')}</div>
+    <div class="lower">
+      <div>${runList(cell)}</div>
+      <div>${compareView(cell)}</div>
+    </div>`;
+}
+
+function render() { applyLayout(); renderSide(); renderMain(); }
+
+let resizeT;
+window.addEventListener('resize', () => { clearTimeout(resizeT); resizeT = setTimeout(() => S.data && renderMain(), 120); });
+
+function openCell(id, withExhibit) {
+  S.cell = id; S.sel = null; S.compare = [];
+  if (withExhibit && !S.exp) {
+    const ex = S.data.exhibits || {};
+    const op = (ex.outcome_pairs || []).find(p => p.cell_id === id);
+    const dp = (ex.divergent_pairs || []).find(p => p.cell_id === id);
+    if (op) S.compare = [op.pass_run, op.fail_run];
+    else if (dp) S.compare = [dp.short_run, dp.long_run];
+  }
+  render();
+}
+
+function load(data) {
+  if (!data || !Array.isArray(data.cells)) throw new Error('not an analysis.json (no cells)');
+  S.data = data; S.model = 'all';
+  $('#empty').hidden = true;
+  $('#app').hidden = false;
+  document.title = `divergence · ${data.meta?.slug || ''}`;
+  const want = params.get('cell');
+  const first = (want && data.cells.some(c => c.cell_id === want)) ? want : (data.exhibits?.featured_cell || sortedCells()[0]?.cell_id);
+  openCell(first, true);
+}
+
+// ── events ───────────────────────────────────────────────────────────────────
+document.addEventListener('change', e => {
+  if (e.target.id === 'modelSel') {
+    S.model = e.target.value;
+    const vis = sortedCells();
+    if (!vis.some(c => c.cell_id === S.cell) && vis[0]) return openCell(vis[0].cell_id, true);
+    renderSide();
+  }
+});
+
+document.addEventListener('click', e => {
+  if (e.target.closest('#togSide')) {
+    S.side = !S.side;
+    applyLayout();
+    return renderMain();
+  }
+
+  const cellEl = e.target.closest('[data-cell]');
+  if (cellEl) return openCell(cellEl.dataset.cell, true);
+
+  const runEl = e.target.closest('[data-run]');
+  if (runEl) {
+    const id = runEl.dataset.run, i = S.compare.indexOf(id);
+    if (i >= 0) S.compare.splice(i, 1);
+    else { S.compare.push(id); if (S.compare.length > 2) S.compare.shift(); }
+    return renderMain();
+  }
+
+  const nodeEl = e.target.closest('[data-node]');
+  if (nodeEl) {
+    const id = Number(nodeEl.dataset.node);
+    S.sel = S.sel === id || id === 0 ? null : id;
+    return renderMain();
+  }
+
+  if (e.target.closest('#tree') && (S.sel != null || S.compare.length)) {
+    S.sel = null; S.compare = [];
+    renderMain();
+  }
+});
+
+['dragenter', 'dragover'].forEach(t => document.addEventListener(t, e => { e.preventDefault(); document.body.classList.add('drag'); }));
+['dragleave', 'drop'].forEach(t => document.addEventListener(t, e => { e.preventDefault(); if (t === 'dragleave' && e.relatedTarget) return; document.body.classList.remove('drag'); }));
+document.addEventListener('drop', e => {
+  const f = e.dataTransfer?.files?.[0];
+  if (!f) return;
+  f.text().then(t => load(JSON.parse(t))).catch(err => showEmpty(`Could not read that file: ${err.message}`));
+});
+
+function showEmpty(msg) {
+  $('#app').hidden = true;
+  $('#empty').hidden = false;
+  if (msg) $('#emptyMsg').textContent = msg;
+}
+
+// ── boot ─────────────────────────────────────────────────────────────────────
+const exp = params.get('exp') || '001-tau-retail';
+if (location.protocol === 'file:') {
+  showEmpty('Opened as a file, so the browser cannot fetch analysis.json. Drop it here instead.');
+} else {
+  fetch(`../experiments/${encodeURIComponent(exp)}/analysis.json`)
+    .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
+    .then(load)
+    .catch(err => showEmpty(`No analysis found for "${exp}" (${err.message}). Run analyse.py first, or drop an analysis.json here.`));
+}
+</script>
+</body>
+</html>

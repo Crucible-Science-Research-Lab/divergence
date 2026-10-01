@@ -1,0 +1,135 @@
+# experiments/001-tau-retail/experiment.yaml
+# Written 30 Sep 2026, before the confirmation files were summarised.
+# analyse.py reads: slug, status, question, preregistered, temperature, provider,
+# tier, max_turns, limitations. The importer reads: source, tasks, models.
+# Everything else is the pre-registration record the note is judged against.
+
+slug: 001-tau-retail
+status: preregistered
+preregistered: 2026-09-30
+
+question: >
+  When a customer-service agent handles the same request four times, under
+  identical settings, where do the runs split, and does the split decide whether
+  the customer's request is handled correctly?
+
+# ── source ──────────────────────────────────────────────────────────────────
+source:
+  kind: tau2-bench-results            # importer: divergence/importers/tau.py
+  repo: https://github.com/sierra-research/tau2-bench
+  commit: 5bfa7e37b36656b37dc6d022156be6563c1007f3
+  licence: MIT
+  path: data/tau2/results/final/
+  downloaded: 2026-09-29
+  local_dir: experiments/001-tau-retail/raw/results   # repo-relative since 1 Oct 2026
+  evaluator_commit: c30d59aaa71c65f9b9eb6a8f8636b48945028fcf   # recorded in the files' info
+  files:
+    exploration:
+      - gpt-4.1-2025-04-14_retail_default_gpt-4.1-2025-04-14_4trials.json
+    confirmation:
+      - claude-3-7-sonnet-20250219_retail_default_gpt-4.1-2025-04-14_4trials.json
+      - o4-mini-2025-04-16_retail_default_gpt-4.1-2025-04-14_4trials.json
+
+models:
+  exploration: [gpt-4.1-2025-04-14]
+  confirmation: [claude-3-7-sonnet-20250219, o4-mini-2025-04-16]
+  user_simulator: gpt-4.1-2025-04-14
+
+provider: sierra-baseline-runs        # we made no model calls
+tier: none
+temperature: 0.0                      # agent and user simulator, per the files' info
+max_turns: 200                        # τ max_steps
+trials_per_task: 4
+
+# ── tasks: fixed rule, applied to the exploration model only ────────────────
+tasks:
+  selection_rule: >
+    Chosen on GPT-4.1 only, before any confirmation data was summarised.
+    Flip group: top 10 tasks by pass/fail flips across 4 runs, then by token spread.
+    Handoff group: tasks that hand off to a human on some runs but not others, not
+    already in the flip group. Controls: always pass, fewest distinct paths, lowest
+    spread.
+  flip: [36, 62, 59, 37, 100, 105, 19, 112, 43, 57]
+  handoff: [50, 25, 18, 47, 27, 111]
+  control: [88, 10]
+
+# ── what counts as what ─────────────────────────────────────────────────────
+definitions:
+  step_key: tool_name                 # tool calls only; agent replies are a stat, not a step
+  handoff_tool: transfer_to_human_agents
+  verdict: >
+    pass when τ's reward_info.reward == 1.0, else fail. The reward is τ's own
+    grading (database end state plus required actions and communications), as
+    computed by the evaluator at evaluator_commit.
+  flip: a (task, model) cell whose 4 runs include at least one pass and one fail
+  first_split: the first branch point in the cell's river (tool-call steps only)
+  cost: τ's agent_cost per run, in US dollars
+  task_validity_check: >
+    Before any hypothesis is scored, the importer compares each selected task's gold
+    state-changing actions in the results file with the same task at
+    source.commit. Tasks whose gold actions changed since the runs were graded are
+    marked grader-suspect: shown in the river, excluded from H1, H3 and H5 counts,
+    and listed in the note. (A pre-scoring look on 30 Sep found task 18's gold
+    exchange target was corrected after these runs; it is expected to be excluded.)
+
+# ── hypotheses: scored on the confirmation models only ──────────────────────
+hypotheses:
+  H1:
+    claim: At least 25% of the non-control tasks flip between pass and fail across four identical runs.
+    measure: flipping cells / non-control, non-suspect tasks, per confirmation model
+    supported: ">= 25% on both confirmation models"
+    kill: "< 10% on both confirmation models"
+    exploration_reference: 43 of 114 tasks (38%) on GPT-4.1, all tasks
+
+  H2:
+    claim: The first split is more often a stopping or escalation decision than a choice between tools.
+    measure: >
+      For each divergent cell, classify the first branch point: stop-vs-continue
+      (one option is an END node, another is a tool call), escalation (one option
+      is the handoff tool), tool choice (all options are different non-handoff
+      tools), or outcome-only (options are END:pass and END:fail after an identical
+      path; counted under H5, not here).
+    supported: stop-vs-continue plus escalation outnumber tool choice, pooled across confirmation models
+    kill: tool choice is equal or greater
+
+  H3:
+    claim: Runs that fail part ways with passing runs earlier than passing runs part ways with each other.
+    measure: >
+      In flipping cells, for every pair of runs, the step at which their tool paths
+      first differ (identical paths score path length + 1). Compare the mean over
+      pass-fail pairs with the mean over pass-pass pairs.
+    supported: pass-fail mean is lower, pooled across confirmation models
+    kill: pass-fail mean is equal or higher
+    note: small n; reported descriptively with the pair counts, no significance claim
+
+  H4:
+    claim: The same request can cost twice as much on one run as on another.
+    measure: max/min cost_usd within each cell
+    supported: ">= 10% of the 18 tasks at 2x or more, on at least one confirmation model"
+    kill: no task reaches 2x on either confirmation model
+    exploration_reference: token spread median 1.32x, max 2.56x, 7 of 114 tasks at 2x+ on GPT-4.1
+
+  H5:
+    claim: Some runs take the identical tool path and still end differently (same path, different outcome).
+    measure: flipping cells containing a pass run and a fail run with identical tool paths
+    supported: at least one such cell on a confirmation model
+    kill: none on either confirmation model
+
+# ── reporting ───────────────────────────────────────────────────────────────
+reporting:
+  - Hypothesis verdicts come from the confirmation models only; GPT-4.1 numbers are reported separately as exploration.
+  - Every verdict is reported whether supported or killed.
+  - The note includes a section mapping findings to RBI's draft model-risk controls, stated as applying to a retail servicing agent by analogy.
+
+budget:
+  model_calls: 0
+  wall_clock: under 2 hours from import to analysis.json
+
+limitations:
+  - Four trials per task is a thin river; per-task rates are rough.
+  - The simulated customer is itself a model, so part of any split may come from the customer, not the agent; recorded runs cannot separate the two (that needs replay from the split point).
+  - Mid-2025 models (GPT-4.1, Claude 3.7 Sonnet, o4-mini); this is a study of method and failure shape, not a model ranking.
+  - Runs and grading are Sierra's harness and evaluator (evaluator commit c30d59aa), graded before later task-quality fixes; tasks whose gold actions changed are flagged and excluded from counts.
+  - Retail servicing, not banking; the banking domain is run separately in note 1b.
+  - Tasks were selected on one model's behaviour, which may favour tasks that are unstable for that model.
+  - Cost is τ's recorded API cost at the time of the runs.
