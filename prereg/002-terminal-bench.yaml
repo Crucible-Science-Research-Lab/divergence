@@ -1,0 +1,193 @@
+# prereg/note2_hypotheses.yaml
+# Pre-registration for note two. Written 2 October 2026, before any confirmation
+# trial's outcome or step log was analysed. Do not edit after confirmation opens;
+# the importer records this file's SHA-256 in the experiment manifest. Any later
+# change of plan is listed in the note under "deviations".
+
+title: "What changes when the model changes, and when the harness does (Terminal-Bench 2.0)"
+author: Ashwin Palve, Crucible Science
+written: 2026-10-02
+status: registered, confirmation unopened
+
+data:
+  source: harborframework/terminal-bench-2-leaderboard (Hugging Face dataset, Apache 2.0)
+  revision: 572b2614be2c0cb2527e14f5b1e4026f1072e6c1
+  benchmark: Terminal-Bench 2.0, 89 tasks, 5 trials per task per submission
+  file_hashes: [out/harbor_fetch_manifest.jsonl, out/harbor_fetch_models_manifest.jsonl]
+  analysis_code: scratch/harbor_import.py, version 0.4.2-scratch (hash recorded in the manifest)
+
+what_was_seen_before_writing:
+  exploration_arms_read_in_full:
+    - GPT-5.3-Codex on CodeBrain-1, CodeBrain-1.5, Simple-Codex, Terminus2 (harness axis)
+    - GPT-5.3-Codex and MiniMax M2.5 on Terminus2 (model axis)
+  confirmation_arms_seen_only_as:
+    - file counts and sizes; whether a step log exists; whether tokens and cost are recorded
+    - config.json and metadata.yaml settings (model name, provider route, reasoning effort,
+      temperature, parser, timeouts)
+    - on 1 Oct, three sample step logs per harness were opened by script to detect the log
+      format; only structure counts were printed (steps, tool calls, token fields present)
+    - on 2 Oct, a structure-only pass ran the importer's parser over the confirmation step
+      logs and printed, per submission, how many logs parsed and which tool names appear
+      (as shares of calls); no outcomes, step counts or token totals
+  not_blinded: each submission's overall leaderboard accuracy is public
+  split_fixed_on: >
+    1 Oct (harness axis: confirmation Claude Opus 4.6, exploration GPT-5.3-Codex) and
+    2 Oct (model axis: exploration GPT-5.3-Codex and MiniMax M2.5, chosen before any
+    cheaper-model trial was read; confirmation the remaining four cheaper models and Opus 4.6)
+
+confirmation:
+  model_axis:
+    harness: Terminus2
+    reference: Claude Opus 4.6
+    cheaper_models: [DeepSeek V3.2, GLM-4.7, GLM-5, Kimi K2.5]
+  harness_axis:
+    model: Claude Opus 4.6
+    harnesses: [Judy, Meta-Harness, Terminus2, Terminus-KIRA, WozCode]
+
+scope:
+  primary: the 61 tasks Terminal-Bench 2.1 did not revise (out/tb21_fixed_tasks.json lists the 28 revised)
+  alongside: all 89 tasks, every number reported for both
+  verdicts_are_decided_on: the primary scope
+
+definitions:
+  pass: verifier reward >= 1.0 in result.json
+  trial_counts: every trial counts in outcomes, whether or not it has a step log
+  task_grade: >
+    for one arm, a task is "every" if all its trials passed, "never" if none did,
+    otherwise "some"
+  cell: a (task, arm) pair with at least 3 trials that have a step log
+  flip: a cell whose logged trials include both a pass and a fail
+  stopped_by_itself: a trial with no exception recorded (not a timeout, not an error)
+  log_estimated_input: >
+    for each model call, the characters in the step log before that call, divided by 4,
+    summed over the run. Computed identically for every arm. An estimate: it assumes the
+    harness resends the whole history on each call. Used on the model axis only (one
+    harness); not used to compare harnesses.
+  per_pass: >
+    log-estimated input summed over every logged trial, passed or not, divided by the
+    number of logged trials that passed
+  same_outcome_task: a cell whose logged trials all have the same outcome
+
+hypotheses:
+  M1:
+    claim: >
+      Of the tasks the reference model passes every time, a cheaper model also passes
+      every time on fewer than 60%.
+    threshold: held share < 0.60
+    decision: supported if it holds for at least 3 of the 4 cheaper models
+    exploration: 40% (14 of 35), MiniMax M2.5 against GPT-5.3-Codex
+  M2:
+    claim: >
+      Of the tasks the reference passes every time and the cheaper model does not hold,
+      at least half are "some" (sometimes passes), not "never".
+    threshold: share >= 0.50
+    decision: supported if it holds for at least 3 of the 4 cheaper models
+    exploration: 76% (16 of 21)
+  M3:
+    claim: >
+      Runs that stop by themselves fail more often on the cheaper model: its rate is at
+      least 1.5 times the reference's and at least 5 percentage points higher.
+    threshold: ratio >= 1.5 and difference >= 0.05
+    decision: supported if it holds for at least 3 of the 4 cheaper models
+    exploration: 29% against 12%
+  M4:
+    claim: >
+      Per pass, the cheaper model uses at least twice the reference's log-estimated input.
+    threshold: ratio >= 2.0
+    decision: supported if it holds for at least 3 of the 4 cheaper models
+    exploration: 8.6x (1.32M against 0.15M estimated tokens)
+    note: >
+      The least certain hypothesis. It rests on one exploration pair, and part of that gap
+      is GPT-5.3-Codex sending several commands per turn. A statement about tokens, not
+      about dollars.
+  M5:
+    claim: >
+      In each of the five models, at least 40% of same-outcome tasks show a 2x or larger
+      gap in log-estimated input between the costliest and cheapest run.
+    threshold: share >= 0.40 in every one of the five arms
+    decision: supported only if it holds in all five
+    exploration: 49% (GPT-5.3-Codex) and 82% (MiniMax M2.5)
+  H1:
+    claim: At least 10% of tasks flip across five runs of the same harness.
+    threshold: flip share >= 0.10
+    decision: supported if it holds in at least 4 of the 5 harnesses
+    exploration: 19% to 36% across four harnesses on GPT-5.3-Codex (all 89 tasks)
+  H2:
+    claim: At least 8% of runs that stop by themselves fail.
+    threshold: share >= 0.08
+    decision: supported if it holds in at least 4 of the 5 harnesses
+    exploration: 13% to 24% (all 89 tasks)
+  H3:
+    claim: >
+      With the model fixed, the harness changes both rates: on the tasks that have a cell
+      in every harness, the highest flip rate is at least 1.5 times the lowest, and the
+      same holds for the stopped-but-failed rate.
+    threshold: highest / lowest >= 1.5 for both rates (if the lowest is zero, the highest must be >= 0.05)
+    decision: supported only if both hold
+    exploration: about 1.9x (flips) and 1.8x (stopped-but-failed), not paired by task
+
+validity_rules:
+  provider_token_counts: >
+    A submission's provider-reported input tokens are shown only if the prompt does not
+    shrink in at least 95% of consecutive model-call pairs (Terminus2 resends the history,
+    so a full-context count cannot shrink). In exploration GPT-5.3-Codex passed (100%) and
+    MiniMax M2.5 served through Ollama cloud failed (61%). A submission with no per-step
+    counts cannot be checked and is treated as failing (the structure-only pass showed
+    GLM-5 has none). No hypothesis depends on provider counts. The rule is not applied on the harness axis, where a harness may
+    compact its context legitimately.
+  missing_step_logs: >
+    Trials without a step log stay in every outcome count. A log with no agent activity
+    counts as no log. Path and spread measures use cells with at least 3 logged trials.
+  glm_5: >
+    GLM-5 ran with a different response parser (xml), temperature 0.7 and a private
+    endpoint. It counts toward the 3-of-4 rule and is flagged; each verdict is also shown
+    without it.
+
+reported_descriptively_not_as_hypotheses:
+  - timeouts (they depend on how fast a provider serves the model under a fixed time limit)
+  - pass rates, output tokens, agent time, tool calls
+  - action mix and whether a run re-ran something after its last edit
+  - dollar estimates, at list prices on a stated date, labelled as estimates
+  - the full 3x3 table of task grades for each model pair
+
+dropped_in_exploration:
+  - "runs that re-ran after their last edit fail less": not supported, not proposed
+  - "runs that look before acting fail less": mixed, not proposed
+
+code_changes_after_opening: >
+  No hypothesis depends on the step key (the action category given to each tool call).
+  The step key may be tuned after confirmation opens, to label tools it has not seen.
+  The scoring in the importer's section 9 and the definitions above will not change. Any
+  change to the importer after opening is listed in the note with its hash before and after.
+
+intervals: >
+  Each reported share carries a 90% interval from resampling tasks (2,000 resamples,
+  seed 20261002). Verdicts are decided on the point values against the thresholds above.
+
+limitations_known_now:
+  - >
+    A "model" here is the model as its submitter configured and served it. Recorded
+    settings: Opus 4.6 reasoning effort high, temperature 1, Anthropic API; GPT-5.3-Codex
+    xhigh; GLM-4.7 high via Ollama cloud; Kimi K2.5 via Ollama cloud, effort not set;
+    DeepSeek V3.2 via the deepseek-chat alias, effort not set; GLM-5 as above.
+  - >
+    On the harness axis the model is the one named in each submission. Judy's and
+    WozCode's configs do not show the model version or reasoning settings; Terminus-KIRA
+    reaches Opus 4.6 through Vertex and is built on the Terminus line.
+  - >
+    The five harnesses are not five independent designs. Meta-Harness and Terminus-KIRA
+    use the same tool names as Terminus2 (plus an image tool), so the set is closer to
+    three designs: the Terminus family, Judy and WozCode. WozCode can hand work to
+    sub-agents whose steps are not in the main log.
+  - Terminal-Bench 2.0 has been superseded (2.1, 3.0, 4.0) and these models date from early 2026.
+  - Five trials per task. Coding and system tasks in a terminal, not any buyer's own agent.
+  - >
+    The step key is one action category per tool call; about 3-5% of shell calls fall
+    through to "run" (typed file contents and input to interactive programs).
+  - Only harnesses that publish a structured trajectory are analysed; the rest are listed with the reason.
+
+will_not_be_claimed:
+  - that any model is more or less capable in isolation from how it was served
+  - that a cheaper model costs more or less in money, beyond a labelled estimate
+  - that these rates transfer to another agent, task set or domain
+  - that a hypothesis was supported when it was not; failures are reported as failures
