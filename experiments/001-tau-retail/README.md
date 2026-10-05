@@ -33,7 +33,7 @@ Of five pre-registered hypotheses, one failed. The note reports each against its
 | `analysis.json` | Every number the analysis computed, per cell and per run |
 | `validity.json` | The task check against the current benchmark (task 18 excluded) |
 | `manifest.json` | Source files, commits and sha256 of every input |
-| `runs/` | 216 runs as OpenTelemetry JSON traces, one file per run |
+| `runs/` | Not stored in the repository. The importer generates it: 216 runs as OpenTelemetry JSON traces, one file per run (see [Reproduce it](#reproduce-it)) |
 | [`exhibits/`](exhibits/) | The trajectory-tree images and the task 37 side-by-side excerpt |
 | `fetch_raw.sh` | Downloads Sierra's raw results at commit 5bfa7e37 and checks their hashes |
 | `checks.sh` | Recomputes the numbers in the note that are not in `analysis.json` |

@@ -8,8 +8,9 @@
 
 ## τ²-bench (Sierra Research), used in experiment 001-tau-retail
 
-The runs in `experiments/001-tau-retail/runs/`, and the quotations from them in the note
-and exhibits, are derived from τ²-bench's published retail baseline results:
+The run files the importer writes to `experiments/001-tau-retail/runs/` (generated, not
+stored here), the analysis built from them, and the quotations in the note and exhibits,
+are derived from τ²-bench's published retail baseline results:
 
 - Repository: https://github.com/sierra-research/tau2-bench
 - Commit: 5bfa7e37b36656b37dc6d022156be6563c1007f3
@@ -18,8 +19,9 @@ and exhibits, are derived from τ²-bench's published retail baseline results:
   `experiments/001-tau-retail/manifest.json` and `fetch_raw.sh`
 
 We converted each run to an OpenTelemetry trace and truncated long tool results to
-4,000 characters; we did not alter grades. The original files are not included here;
-`fetch_raw.sh` downloads them from the repository above.
+4,000 characters; we did not alter grades. Neither the original files nor the converted
+runs are included here; `fetch_raw.sh` downloads the originals and the importer rebuilds
+the runs.
 
 τ²-bench is distributed under the MIT License, reproduced below as it appears in
 that repository's `LICENSE` file at the commit above.

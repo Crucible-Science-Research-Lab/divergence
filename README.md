@@ -18,8 +18,9 @@ By [Crucible Science](https://cruciblescience.com).
 | 001 | [Same customer, same request, four runs](experiments/001-tau-retail/NOTE.md) | Sierra's τ²-bench retail results, 216 runs, 3 models | October 2026 · tag `001-tau-retail-v1` |
 
 Each note lives in its own folder under `experiments/`, with its pre-registration,
-analysis, run files, exhibits and the scripts to rebuild it. A note is frozen at its tag;
-the engine keeps evolving.
+analysis, exhibits and the scripts to rebuild it. The run files are not stored here: the
+importer generates them from the source data. A note is frozen at its tag; the engine
+keeps evolving.
 
 ## Check our work in 90 seconds
 
