@@ -1,0 +1,40 @@
+Hidden actions under the step label, 2026-10-06 10:56 UTC
+database out/harbor.duckdb; tasks revised in Terminal-Bench 2.1: 28
+
+====================================================================================================
+model axis (Terminus2 fixed): 111,823 calls, 2,212 runs with a step log (expected 2,212: ok)
+
+-- all 89 tasks (89 tasks in the trials table)
+arm                   calls  several   share  key calls  several   share  run hides edit   share   runs  touched   share
+Claude-Opus-4.6      13,948    2,067   14.8%     12,752    1,933   15.2%             276    2.0%    445       87   19.6%
+DeepSeek-V3.2        33,684    3,435   10.2%     29,471    3,401   11.5%             257    0.8%    445       83   18.7%
+GLM-4.7              20,158    1,690    8.4%     18,711    1,558    8.3%             244    1.2%    435       33    7.6%
+GLM-5                20,267    1,997    9.9%     18,189    1,971   10.8%             369    1.8%    445       53   11.9%
+Kimi-k2.5            23,766    2,407   10.1%     22,249    2,363   10.6%             358    1.5%    442       55   12.4%
+
+-- primary scope, 61 tasks (61 tasks in the trials table)
+arm                   calls  several   share  key calls  several   share  run hides edit   share   runs  touched   share
+Claude-Opus-4.6       8,223      952   11.6%      7,867      903   11.5%             196    2.4%    305       58   19.0%
+DeepSeek-V3.2        22,786    2,183    9.6%     20,258    2,158   10.7%             136    0.6%    305       52   17.0%
+GLM-4.7              14,164    1,182    8.3%     13,350    1,064    8.0%             230    1.6%    298       27    9.1%
+GLM-5                13,816    1,043    7.5%     12,711    1,024    8.1%             329    2.4%    305       43   14.1%
+Kimi-k2.5            17,752    1,577    8.9%     16,927    1,536    9.1%             333    1.9%    302       44   14.6%
+
+====================================================================================================
+harness axis (Claude Opus 4.6 fixed): 106,169 calls, 2,221 runs with a step log (expected 2,221: ok)
+
+-- all 89 tasks (89 tasks in the trials table)
+arm                   calls  several   share  key calls  several   share  run hides edit   share   runs  touched   share
+Judy                 22,648    2,968   13.1%     21,090    2,899   13.7%             324    1.4%    445      108   24.3%
+Meta-Harness         35,160    3,032    8.6%     21,345    2,929   13.7%             631    1.8%    445      170   38.2%
+Terminus-KIRA        26,640    3,527   13.2%     21,217    3,415   16.1%             974    3.7%    442      253   57.2%
+Terminus2            13,948    2,067   14.8%     12,752    1,933   15.2%             276    2.0%    445       87   19.6%
+WozCode               7,773    2,778   35.7%      7,696    2,720   35.3%             813   10.5%    444      223   50.2%
+
+-- primary scope, 61 tasks (61 tasks in the trials table)
+arm                   calls  several   share  key calls  several   share  run hides edit   share   runs  touched   share
+Judy                 14,654    1,835   12.5%     13,730    1,808   13.2%             217    1.5%    305       65   21.3%
+Meta-Harness         17,408    1,645    9.4%     13,361    1,584   11.9%             414    2.4%    305      106   34.8%
+Terminus-KIRA        14,979    2,075   13.9%     13,292    2,009   15.1%             682    4.6%    302      170   56.3%
+Terminus2             8,223      952   11.6%      7,867      903   11.5%             196    2.4%    305       58   19.0%
+WozCode               4,765    1,565   32.8%      4,714    1,526   32.4%             583   12.2%    305      150   49.2%

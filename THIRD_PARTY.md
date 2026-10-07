@@ -50,3 +50,27 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 ```
+
+## Terminal-Bench 2.0 trials (Harbor) and tasks (Laude Institute), used in experiment 002-terminal-bench
+
+The reports in `experiments/002-terminal-bench/reports/` and `checks/`, the run files the
+importer generates (not stored here), and the quotations in the note and its exhibits are
+derived from:
+
+- Trials: https://huggingface.co/datasets/harborframework/terminal-bench-2-leaderboard,
+  revision 572b2614be2c0cb2527e14f5b1e4026f1072e6c1, Apache License 2.0. The runs and
+  their rewards are the submitters' and Harbor's. File names, sizes and sha256 are in
+  `experiments/002-terminal-bench/manifest.tsv`.
+- Tasks: https://github.com/laude-institute/terminal-bench-2, commit
+  2fd12b88aafdd04a52c298e3940bcb189f9766d6, Apache License 2.0. Read by `hero_verify.py`
+  and by the task-repository comparison in `checks/`, which also reads
+  https://github.com/harbor-framework/terminal-bench-2-1 at commit
+  7131e4375048a0e408a8fb404b5f499d726b695b.
+
+Neither the trial files nor the task files are copied into this repository; `fetch.py`
+downloads the trials from the source. We converted each trial's step log to an
+OpenTelemetry trace, truncated long tool results to 4,000 characters and labelled each
+tool call with an action category; we did not alter the recorded rewards. The exhibits
+quote short excerpts of the trial logs and of one task's instructions.
+
+The Apache License 2.0 is at https://www.apache.org/licenses/LICENSE-2.0.

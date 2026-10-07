@@ -1,0 +1,47 @@
+# Task-repository comparison, run 6 Oct 2026 from public clones
+# 2.0: laude-institute/terminal-bench-2 @ 2fd12b88aafdd04a52c298e3940bcb189f9766d6
+# 2.1: harbor-framework/terminal-bench-2-1 @ 7131e4375048a0e408a8fb404b5f499d726b695b (tasks/)
+tasks in 2.0: 89 tasks in 2.1: 89  only 2.0: []  only 2.1: []
+announced: 28 missing from repos: []
+
+tasks that differ today: 28
+announced and differ: 26
+announced and identical: ['crack-7z-hash', 'gpt2-codegolf']
+differ but not announced: ['pytorch-model-recovery', 'sanitize-git-repo']
+* adaptive-rejection-sampler [('instruction.md', 'M'), ('solution/solve.sh', 'M')]
+* build-pmars [('instruction.md', 'M'), ('solution/solve.sh', 'M')]
+* build-pov-ray [('solution/solve.sh', 'M')]
+* caffe-cifar-10 [('environment/Dockerfile', 'M'), ('instruction.md', 'M'), ('task.toml', 'M'), ('tests/test_outputs.py', 'M')]
+* compile-compcert [('environment/Dockerfile', 'M'), ('task.toml', 'M')]
+* configure-git-webserver [('solution/solve.sh', 'M'), ('tests/verify.sh', 'M')]
+* extract-moves-from-video [('environment/Dockerfile', 'M'), ('environment/task-deps/video.mp4', 'A'), ('instruction.md', 'M'), ('task.toml', 'M')]
+* filter-js-from-html [('instruction.md', 'M'), ('task.toml', 'M')]
+* financial-document-processor [('solution/solve.sh', 'M')]
+* fix-git [('environment/Dockerfile', 'M'), ('task.toml', 'M'), ('tests/test_outputs.py', 'M')]
+* hf-model-inference [('environment/Dockerfile', 'M'), ('task.toml', 'M'), ('tests/test_outputs.py', 'M')]
+* install-windows-3.11 [('instruction.md', 'M'), ('tests/test_outputs.py', 'M')]
+* make-doom-for-mips [('solution/solve.sh', 'M')]
+* mcmc-sampling-stan [('solution/solve.sh', 'M')]
+* mteb-leaderboard [('environment/Dockerfile', 'M'), ('instruction.md', 'M'), ('task.toml', 'M')]
+* mteb-retrieve [('environment/Dockerfile', 'M'), ('instruction.md', 'M'), ('task.toml', 'M')]
+* overfull-hbox [('environment/Dockerfile', 'M'), ('task.toml', 'M')]
+* polyglot-c-py [('tests/test_outputs.py', 'M')]
+* polyglot-rust-c [('tests/test_outputs.py', 'M')]
+* protein-assembly [('environment/pdb_ids.py', 'D'), ('solution/solve.sh', 'M'), ('task.toml', 'M')]
+  pytorch-model-recovery [('environment/Dockerfile', 'M'), ('task.toml', 'M')]
+* query-optimize [('instruction.md', 'M')]
+* rstan-to-pystan [('solution/solve.sh', 'M')]
+* sam-cell-seg [('instruction.md', 'M'), ('tests/test_outputs.py', 'M')]
+  sanitize-git-repo [('tests/test_outputs.py', 'M')]
+* torch-pipeline-parallelism [('task.toml', 'M')]
+* torch-tensor-parallelism [('instruction.md', 'M'), ('task.toml', 'M')]
+* train-fasttext [('tests/test.sh', 'M'), ('tests/test_outputs.py', 'M')]
+
+== files touched by 53ff2b87 (2026-02-26T17:09:11-08:00, 'Various task fixes for TB2.1') in the 2.0 repo
+M	crack-7z-hash/task.toml
+M	filter-js-from-html/task.toml
+M	gpt2-codegolf/task.toml
+M	install-windows-3.11/tests/test_outputs.py
+M	overfull-hbox/solution/solve.sh
+M	query-optimize/task.toml
+M	rstan-to-pystan/solution/solve.sh

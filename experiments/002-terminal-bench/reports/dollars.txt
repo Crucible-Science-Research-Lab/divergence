@@ -1,0 +1,162 @@
+Note two: dollars, recorded and estimated, 2026-10-03 09:06 UTC
+source harbor.duckdb; 90% interval = 5th to 95th percentile over 2,000 resamples of tasks (with replacement, seed 20261002)
+RECORDED = dollars in the leaderboard logs. ESTIMATE = recorded tokens x the maker's list
+price; not what the submitter paid. GLM-5 has no token counts and is left out.
+
+== model axis ============================================================
+recorded per arm (all 89 tasks): trials, with dollars, with tokens, run dates
+   Claude-Opus-4.6   445   445   445   2026-02-06 to 2026-02-06
+   DeepSeek-V3.2     445   445   445   2026-02-07 to 2026-02-08
+   GLM-4.7           445     0   435   2026-01-26 to 2026-01-27
+   GLM-5             445     0     0   2026-02-14 to 2026-02-14
+   Kimi-k2.5         445     0   442   2026-01-27 to 2026-01-28
+recorded dollars per pass and provider tokens per pass match the confirmation report on both scopes
+list prices used, dollars per million tokens:
+   Claude-Opus-4.6  input 5.0, cached input 0.5, output 25.0, cache write 6.25   [Anthropic price page, read 2 Oct 2026; still listed]
+   DeepSeek-V3.2    input 0.28, cached input 0.028, output 0.42   [secondary source (BenchLM); no longer on DeepSeek's price page]
+   GLM-4.7          input 0.6, cached input 0.11, output 2.2   [Z.ai price page, read 2 Oct 2026; still listed]
+   Kimi-k2.5        input 0.6, cached input 0.1, output 3.0   [secondary source (eesel, citing Moonshot); no longer on Kimi's price page]
+
+-- method check: do tokens x list price reproduce the recorded dollars? (all 89 tasks)
+   'reads at cache price' = recorded cached tokens at the cache price, the rest of the
+   input at the full input price. For Opus the rest may include cache writes, which
+   cost more, so a second figure prices the rest at the cache-write price.
+   Claude-Opus-4.6: 445 trials, cached share of input 91%
+      recorded $293.61; reads at cache price $282.78 (recorded / this = 1.04); rest at write price $297.48 (recorded / this = 0.99)
+      no caching at all $824.00 (recorded / this = 0.36)
+      per trial, recorded / 'reads at cache price': median 1.04, 5th to 95th percentile 1.00 to 1.08
+   DeepSeek-V3.2: 445 trials, cached share of input 97%
+      recorded $13.67; reads at cache price $13.67 (recorded / this = 1.00)
+      no caching at all $86.23 (recorded / this = 0.16)
+      per trial, recorded / 'reads at cache price': median 1.00, 5th to 95th percentile 1.00 to 1.00
+
+-- model axis, PRIMARY scope: 61 tasks; 2,000 resamples of tasks, seed 20261002
+measure                                              arm              point      90% interval
+RECORDED dollars per run                             Claude-Opus-4.6  $0.605     $0.461 to $0.770
+RECORDED dollars per run                             DeepSeek-V3.2    $0.033     $0.023 to $0.047
+RECORDED dollars per pass                            Claude-Opus-4.6  $0.802     $0.581 to $1.084
+RECORDED dollars per pass                            DeepSeek-V3.2    $0.069     $0.044 to $0.109
+  Opus per run / this model per run                  DeepSeek-V3.2    18.6x      12.2x to 27.4x
+  Opus per pass / this model per pass                DeepSeek-V3.2    11.6x      7.1x to 18.1x
+provider input per pass (tokens)                     Claude-Opus-4.6  0.29M      0.17M to 0.43M
+provider input per pass (tokens)                     DeepSeek-V3.2    1.56M      0.84M to 2.72M
+provider input per pass (tokens)                     GLM-4.7          1.82M      1.13M to 2.89M
+provider input per pass (tokens)                     Kimi-k2.5        2.42M      1.44M to 3.90M
+  this model / Opus                                  DeepSeek-V3.2    5.4x       2.9x to 10.6x
+  this model / Opus                                  GLM-4.7          6.3x       4.2x to 9.9x
+  this model / Opus                                  Kimi-k2.5        8.5x       6.1x to 11.9x
+ESTIMATE, no caching: dollars per run                Claude-Opus-4.6  $1.451     $0.955 to $2.041
+ESTIMATE, no caching: dollars per run                DeepSeek-V3.2    $0.211     $0.126 to $0.339
+ESTIMATE, no caching: dollars per run                GLM-4.7          $0.491     $0.347 to $0.656
+ESTIMATE, no caching: dollars per run                Kimi-k2.5        $0.769     $0.506 to $1.086
+ESTIMATE, no caching: dollars per pass               Claude-Opus-4.6  $1.925     $1.234 to $2.788
+ESTIMATE, no caching: dollars per pass               DeepSeek-V3.2    $0.451     $0.249 to $0.782
+ESTIMATE, no caching: dollars per pass               GLM-4.7          $1.220     $0.765 to $1.923
+ESTIMATE, no caching: dollars per pass               Kimi-k2.5        $1.581     $0.956 to $2.510
+  Opus per pass / this model per pass                DeepSeek-V3.2    4.3x       2.3x to 7.8x
+  Opus per pass / this model per pass                GLM-4.7          1.6x       1.0x to 2.3x
+  Opus per pass / this model per pass                Kimi-k2.5        1.2x       0.9x to 1.7x
+ESTIMATE, 95% cached: dollars per run                GLM-4.7          $0.150     $0.110 to $0.196
+ESTIMATE, 95% cached: dollars per run                Kimi-k2.5        $0.209     $0.143 to $0.286
+ESTIMATE, 95% cached: dollars per pass               GLM-4.7          $0.374     $0.240 to $0.581
+ESTIMATE, 95% cached: dollars per pass               Kimi-k2.5        $0.430     $0.271 to $0.665
+  Opus RECORDED per pass / this estimate             GLM-4.7          2.1x       1.5x to 3.1x
+  Opus RECORDED per pass / this estimate             Kimi-k2.5        1.9x       1.4x to 2.5x
+on the tasks both Opus and the model pass every time (same tasks, every run a pass):
+measure                                              arm              point      90% interval
+tasks                                                DeepSeek-V3.2    12         7 to 17
+tasks                                                GLM-4.7          11         6 to 16
+tasks                                                Kimi-k2.5        14         9 to 19
+RECORDED dollars per run, Opus                       DeepSeek-V3.2    $0.188     $0.136 to $0.242
+RECORDED dollars per run, this model                 DeepSeek-V3.2    $0.008     $0.006 to $0.010
+  Opus / this model                                  DeepSeek-V3.2    24.1x      21.2x to 27.5x
+ESTIMATE, no caching: per run, Opus                  DeepSeek-V3.2    $0.264     $0.174 to $0.360
+ESTIMATE, no caching: per run, Opus                  GLM-4.7          $0.186     $0.147 to $0.220
+ESTIMATE, no caching: per run, Opus                  Kimi-k2.5        $0.268     $0.190 to $0.352
+ESTIMATE, no caching: per run, this model            DeepSeek-V3.2    $0.033     $0.022 to $0.044
+ESTIMATE, no caching: per run, this model            GLM-4.7          $0.042     $0.029 to $0.056
+ESTIMATE, no caching: per run, this model            Kimi-k2.5        $0.072     $0.036 to $0.111
+  Opus / this model                                  DeepSeek-V3.2    8.0x       6.6x to 9.5x
+  Opus / this model                                  GLM-4.7          4.4x       3.5x to 5.6x
+  Opus / this model                                  Kimi-k2.5        3.7x       2.7x to 6.2x
+
+-- model axis, all tasks (alongside): 89 tasks; 2,000 resamples of tasks, seed 20261002
+measure                                              arm              point      90% interval
+RECORDED dollars per run                             Claude-Opus-4.6  $0.660     $0.538 to $0.800
+RECORDED dollars per run                             DeepSeek-V3.2    $0.031     $0.023 to $0.040
+RECORDED dollars per pass                            Claude-Opus-4.6  $1.049     $0.807 to $1.356
+RECORDED dollars per pass                            DeepSeek-V3.2    $0.078     $0.054 to $0.113
+  Opus per run / this model per run                  DeepSeek-V3.2    21.5x      15.8x to 29.0x
+  Opus per pass / this model per pass                DeepSeek-V3.2    13.5x      9.4x to 19.0x
+provider input per pass (tokens)                     Claude-Opus-4.6  0.47M      0.31M to 0.67M
+provider input per pass (tokens)                     DeepSeek-V3.2    1.69M      1.05M to 2.65M
+provider input per pass (tokens)                     GLM-4.7          1.96M      1.34M to 2.88M
+provider input per pass (tokens)                     Kimi-k2.5        2.32M      1.46M to 3.53M
+  this model / Opus                                  DeepSeek-V3.2    3.6x       2.2x to 5.9x
+  this model / Opus                                  GLM-4.7          4.2x       2.9x to 6.3x
+  this model / Opus                                  Kimi-k2.5        4.9x       3.4x to 7.2x
+ESTIMATE, no caching: dollars per run                Claude-Opus-4.6  $1.852     $1.330 to $2.435
+ESTIMATE, no caching: dollars per run                DeepSeek-V3.2    $0.194     $0.133 to $0.281
+ESTIMATE, no caching: dollars per run                GLM-4.7          $0.443     $0.340 to $0.556
+ESTIMATE, no caching: dollars per run                Kimi-k2.5        $0.649     $0.450 to $0.866
+ESTIMATE, no caching: dollars per pass               Claude-Opus-4.6  $2.943     $2.027 to $4.100
+ESTIMATE, no caching: dollars per pass               DeepSeek-V3.2    $0.490     $0.309 to $0.765
+ESTIMATE, no caching: dollars per pass               GLM-4.7          $1.310     $0.902 to $1.913
+ESTIMATE, no caching: dollars per pass               Kimi-k2.5        $1.519     $0.967 to $2.286
+  Opus per pass / this model per pass                DeepSeek-V3.2    6.0x       3.7x to 9.7x
+  Opus per pass / this model per pass                GLM-4.7          2.2x       1.5x to 3.2x
+  Opus per pass / this model per pass                Kimi-k2.5        1.9x       1.4x to 2.8x
+ESTIMATE, 95% cached: dollars per run                GLM-4.7          $0.134     $0.105 to $0.166
+ESTIMATE, 95% cached: dollars per run                Kimi-k2.5        $0.178     $0.129 to $0.231
+ESTIMATE, 95% cached: dollars per pass               GLM-4.7          $0.397     $0.278 to $0.569
+ESTIMATE, 95% cached: dollars per pass               Kimi-k2.5        $0.417     $0.275 to $0.616
+  Opus RECORDED per pass / this estimate             GLM-4.7          2.6x       1.9x to 3.6x
+  Opus RECORDED per pass / this estimate             Kimi-k2.5        2.5x       1.9x to 3.4x
+on the tasks both Opus and the model pass every time (same tasks, every run a pass):
+measure                                              arm              point      90% interval
+tasks                                                DeepSeek-V3.2    12         7 to 18
+tasks                                                GLM-4.7          11         6 to 17
+tasks                                                Kimi-k2.5        16         10 to 22
+RECORDED dollars per run, Opus                       DeepSeek-V3.2    $0.188     $0.136 to $0.244
+RECORDED dollars per run, this model                 DeepSeek-V3.2    $0.008     $0.006 to $0.010
+  Opus / this model                                  DeepSeek-V3.2    24.1x      21.1x to 27.3x
+ESTIMATE, no caching: per run, Opus                  DeepSeek-V3.2    $0.264     $0.174 to $0.362
+ESTIMATE, no caching: per run, Opus                  GLM-4.7          $0.186     $0.151 to $0.220
+ESTIMATE, no caching: per run, Opus                  Kimi-k2.5        $0.296     $0.203 to $0.392
+ESTIMATE, no caching: per run, this model            DeepSeek-V3.2    $0.033     $0.022 to $0.045
+ESTIMATE, no caching: per run, this model            GLM-4.7          $0.042     $0.030 to $0.058
+ESTIMATE, no caching: per run, this model            Kimi-k2.5        $0.075     $0.042 to $0.114
+  Opus / this model                                  DeepSeek-V3.2    8.0x       6.5x to 9.5x
+  Opus / this model                                  GLM-4.7          4.4x       3.4x to 5.6x
+  Opus / this model                                  Kimi-k2.5        4.0x       2.9x to 5.9x
+
+== harness axis ============================================================
+recorded per arm (all 89 tasks): trials, with dollars, with tokens, run dates
+   Judy              445     0     0   2026-02-10 to 2026-02-13
+   Meta-Harness      445   445   445   2026-03-26 to 2026-03-26
+   Terminus-KIRA     445   442   442   2026-02-13 to 2026-02-13
+   Terminus2         445   445   445   2026-02-06 to 2026-02-06
+   WozCode           445     0   444   2026-03-28 to 2026-03-29
+recorded dollars per pass match the confirmation report on both scopes
+
+-- harness axis, PRIMARY scope: 61 tasks; 2,000 resamples of tasks, seed 20261002
+measure                                              arm              point      90% interval
+RECORDED dollars per run                             Meta-Harness     $1.640     $1.273 to $2.088
+RECORDED dollars per run                             Terminus-KIRA    $1.447     $1.154 to $1.788
+RECORDED dollars per run                             Terminus2        $0.605     $0.461 to $0.770
+RECORDED dollars per pass                            Meta-Harness     $1.895     $1.442 to $2.457
+RECORDED dollars per pass                            Terminus-KIRA    $1.694     $1.314 to $2.167
+RECORDED dollars per pass                            Terminus2        $0.802     $0.581 to $1.084
+  per pass, times Terminus2's                        Meta-Harness     2.4x       2.0x to 2.8x
+  per pass, times Terminus2's                        Terminus-KIRA    2.1x       1.8x to 2.6x
+
+-- harness axis, all tasks (alongside): 89 tasks; 2,000 resamples of tasks, seed 20261002
+measure                                              arm              point      90% interval
+RECORDED dollars per run                             Meta-Harness     $2.058     $1.637 to $2.542
+RECORDED dollars per run                             Terminus-KIRA    $1.615     $1.341 to $1.923
+RECORDED dollars per run                             Terminus2        $0.660     $0.538 to $0.800
+RECORDED dollars per pass                            Meta-Harness     $2.693     $2.062 to $3.474
+RECORDED dollars per pass                            Terminus-KIRA    $2.156     $1.706 to $2.700
+RECORDED dollars per pass                            Terminus2        $1.049     $0.807 to $1.356
+  per pass, times Terminus2's                        Meta-Harness     2.6x       2.1x to 3.2x
+  per pass, times Terminus2's                        Terminus-KIRA    2.1x       1.7x to 2.4x

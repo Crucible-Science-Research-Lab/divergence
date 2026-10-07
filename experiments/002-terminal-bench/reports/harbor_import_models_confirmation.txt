@@ -1,0 +1,271 @@
+Harbor import (model axis, confirmation; held fixed: Terminus2), 2026-10-03 08:53 UTC
+repo harborframework/terminal-bench-2-leaderboard  revision 572b2614be2c0cb2527e14f5b1e4026f1072e6c1
+submissions: Terminus2__Claude-Opus-4.6, Terminus2__DeepSeek-V3.2, Terminus2__GLM-4.7, Terminus2__GLM-5, Terminus2__Kimi-k2.5
+importer 0.5.0; pre-registration sha256: 53293b6d519dc2a3c6410b99f39b37246375177d12fe01ad04719765610a4248
+tasks revised in Terminal-Bench 2.1: 28
+
+== 1. Trials and outcomes per arm ========================================
+pass all = over every trial (leaderboard view); pass logged = over trials with a step log
+logs with no agent activity (counted as no log): none
+arm              trials logged no log bad json pass all pass logged pass no-log
+Claude-Opus-4.6     445    445      0        0      63%         63%           -
+DeepSeek-V3.2       445    445      0        0      40%         40%           -
+GLM-4.7             445    435     10        0      33%         34%          0%
+GLM-5               445    445      0        0      52%         52%           -
+Kimi-k2.5           445    442      3        0      42%         43%          0%
+
+== 2. How runs ended (all trials) ========================================
+stopped itself = no exception recorded; done call = an explicit 'declare done' tool call
+-- Claude-Opus-4.6: completed 364, AgentTimeoutError 81
+   failed trials 165: stopped itself 92, exception 73; logged runs with a done call 367/445, of which failed 94
+   no-log trials by ending: none
+-- DeepSeek-V3.2: completed 354, AgentTimeoutError 90, RewardFileNotFoundError 1
+   failed trials 269: stopped itself 183, exception 86; logged runs with a done call 359/445, of which failed 188
+   no-log trials by ending: none
+-- GLM-4.7: completed 284, AgentTimeoutError 143, DaytonaError 17, DownloadVerifierDirError 1
+   failed trials 298: stopped itself 139, exception 159; logged runs with a done call 288/435, of which failed 143
+   no-log trials by ending: DaytonaError 10
+-- GLM-5: completed 334, AgentTimeoutError 108, AddTestsDirError 3
+   failed trials 214: stopped itself 113, exception 101; logged runs with a done call 338/445, of which failed 117
+   no-log trials by ending: none
+-- Kimi-k2.5: completed 344, AgentTimeoutError 91, DaytonaError 9, AddTestsDirError 1
+   failed trials 256: stopped itself 161, exception 95; logged runs with a done call 349/442, of which failed 166
+   no-log trials by ending: DaytonaError 3
+
+== 3. Size of a run (logged trials; median) ==============================
+arm               turns  calls  key raw key collapsed     in tok  out tok  cost $ step usage
+Claude-Opus-4.6      10     20       19            10     79,360    8,377    0.37       100%
+DeepSeek-V3.2        19     58       53            32    298,411   12,717    0.02       100%
+GLM-4.7              19     31       29            16    198,183   10,359       -       100%
+GLM-5                20     27       24            13          0        0       -         0%
+Kimi-k2.5            21   31.5       28          14.5    233,238    9,008       -       100%
+
+== 4. Action mix (share of tool calls) ===================================
+arm                  done  install    fetch      run     edit   delete  inspect    other  control     plan
+Claude-Opus-4.6        6%       4%       2%      30%      16%       1%      33%       0%       9%       0%
+DeepSeek-V3.2          2%       3%       2%      27%      20%       1%      33%       0%      13%       0%
+GLM-4.7                3%       2%       2%      33%      21%       0%      31%       0%       7%       0%
+GLM-5                  4%       2%       5%      30%      16%       1%      32%       0%      10%       0%
+Kimi-k2.5              3%       2%       2%      36%      19%       1%      30%       0%       6%       0%
+
+   Claude-Opus-4.6 tools: bash_command 13,147, mark_task_complete 801
+   DeepSeek-V3.2 tools: bash_command 32,913, mark_task_complete 771
+   GLM-4.7 tools: bash_command 19,508, mark_task_complete 650
+   GLM-5 tools: bash_command 19,550, mark_task_complete 717
+   Kimi-k2.5 tools: bash_command 22,947, mark_task_complete 819
+
+== 5. Cells (task x arm) with >= 3 logged runs ===========================
+arm              cells  flip all pass all fail paths/cell raw paths all distinct
+Claude-Opus-4.6     89    30       39       20          5         5           45
+DeepSeek-V3.2       89    33       19       37          5         5           87
+GLM-4.7             89    30       15       44          5         5           69
+GLM-5               89    32       29       28          5         5           62
+Kimi-k2.5           89    35       18       36          5         5           69
+
+== 6. To tune the step key ===============================================
+programs that fell through to 'run' (not in any list), top 40:
+  pmars 5,328, tesseract 437, mailman 377, socat 308, fasttext 234, const 199, postconf 160, C-c 157, ENDSCRIPT 146, jobs 133, EOF 108, postfix 102, oligotm 91, mips-linux-gnu-objdump 80, postmap 78, <( 60, i 60, uint32_t 56, r2 53, c 43, int 42, cobc 38, quit 38, C-\ 37, chpasswd 36, password 36, mipsel-linux-gnu-objdump 36, i++) 36, password123 35, (op 35, useradd 34, mipsel-linux-gnu-readelf 34, root 32, devpi 32, pypi-server 30, PYEOF 27, from 27, self.master_fd 27, class 24, i++ 24
+share of tool calls with a program that fell through, per arm: Claude-Opus-4.6 8%, DeepSeek-V3.2 4%, GLM-4.7 5%, GLM-5 9%, Kimi-k2.5 11%
+tools labelled 'other':
+  none
+most common collapsed paths (all arms):
+    41  inspect|edit|run|inspect|done
+    35  inspect|edit|inspect|done
+    31  inspect|edit|inspect|edit|inspect|done
+    27  edit|inspect|run|done
+    23  inspect|edit|run|done
+    22  inspect|edit|inspect|edit|inspect|edit|inspect|done
+    16  inspect|run|edit|run|inspect|done
+    14  inspect|edit|inspect|run|done
+
+== 7. Candidate measures per arm (count/of and share), all tasks =========
+cells = (task, arm) with >= 3 logged runs. 'stopped' = no exception recorded.
+per pass = tokens spent on every trial, passed or not, divided by the passes.
+! = provider input counts fail the rule (prompt does not shrink in >= 95% of step pairs) or cannot be checked (no per-step counts); do not use.
+log-est. input = characters in the log before each model call / 4, summed (estimate).
+measure                                  Claude-Opus-4.6   DeepSeek-V3.2         GLM-4.7           GLM-5       Kimi-k2.5
+passed (all trials)                          280/445 63%     176/445 40%     147/445 33%     231/445 52%     189/445 42%
+tasks whose outcome flips                      30/89 34%       33/89 37%       30/89 34%       32/89 36%       35/89 39%
+timed out (all trials)                        81/445 18%      90/445 20%     143/445 32%     108/445 24%      91/445 20%
+stopped by itself, but failed                 92/364 25%     183/354 52%     139/284 49%     113/334 34%     161/344 47%
+explicit done call, but failed                94/367 26%     188/359 52%     143/288 50%     117/338 35%     166/349 48%
+stopped runs: tested after last edit         260/364 71%     292/354 82%     214/284 75%     244/334 73%     261/344 76%
+stopped runs: edited, never re-ran            91/364 25%      61/354 17%      65/284 23%      85/334 25%      76/344 22%
+stopped runs: no edit step at all              13/364 4%        1/354 0%        5/284 2%        5/334 1%        7/344 2%
+  fail rate if tested                         71/260 27%     147/292 50%     102/214 48%      88/244 36%     130/261 50%
+  fail rate if untested                        18/91 20%       36/61 59%       33/65 51%       22/85 26%       30/76 39%
+  fail rate if no edit                          3/13 23%          0/1 0%         4/5 80%         3/5 60%         1/7 14%
+cells where runs disagree on testing           17/89 19%       29/89 33%       29/89 33%       25/89 28%       26/89 29%
+first action is not a look                   119/445 27%       40/445 9%      70/435 16%      79/445 18%      83/442 19%
+  fail rate if looked first                  111/326 34%     248/405 61%     249/365 68%     183/366 50%     213/359 59%
+  fail rate if not                            54/119 45%       21/40 52%       39/70 56%       31/79 39%       40/83 48%
+runs that fetched from the network            71/445 16%      88/445 20%      72/435 17%      73/445 16%      72/442 16%
+runs that installed packages                 212/445 48%     263/445 59%     184/435 42%     186/445 42%     192/442 43%
+same path, different outcome (cells)             6/89 7%         0/89 0%         2/89 2%         6/89 7%         4/89 4%
+tool calls: same-outcome cells at 2x+          19/59 32%       26/56 46%       33/59 56%       19/57 33%       32/54 59%
+  median max/min, tool calls                       1.54x           1.87x           2.14x           1.71x           2.09x
+agent time: same-outcome cells at 2x+          23/59 39%       22/56 39%       34/59 58%       17/57 30%       39/54 72%
+  median max/min, agent time                       1.52x           1.70x           2.18x           1.62x           2.89x
+log-est. input: same-outcome cells at 2x+       35/59 59%       46/56 82%       49/59 83%       41/57 72%       44/54 81%
+  median max/min, log-est. input                   2.38x           2.77x           4.49x           2.43x           4.12x
+provider input: same-outcome cells at 2x+       36/59 61%       44/56 79%       49/59 83%             - !       44/54 81%
+  median max/min, provider input                   2.54x           2.56x           4.48x             - !           4.13x
+provider counts: prompt never shrinks        100% usable     100% usable     100% usable no per-step counts !     100% usable
+  provider / log-estimated input, median            1.52            1.30            1.34             - !            1.31
+log-est. input spent per pass (M tok)               0.28            1.31            1.39            1.46            1.65
+trials with tokens recorded                 445/445 100%    445/445 100%     435/445 98%        0/445 0%     442/445 99%
+provider input spent per pass (M)                   0.47            1.69            1.96             - !            2.32
+output tokens spent per pass (k)                      23              40              60               -              42
+  cached share of input, median              75% (n=445)     95% (n=445)      0% (n=435)    not recorded      0% (n=442)
+trials with dollar cost recorded            445/445 100%    445/445 100%        0/445 0%        0/445 0%        0/445 0%
+  recorded dollars spent per pass                   1.05            0.08               -               -               -
+
+== 7b. Same measures on the 61 tasks Terminal-Bench 2.1 did not revise ===
+measure                                  Claude-Opus-4.6   DeepSeek-V3.2         GLM-4.7           GLM-5       Kimi-k2.5
+passed (all trials)                          230/305 75%     143/305 47%     120/305 39%     186/305 61%     147/305 48%
+tasks whose outcome flips                      24/61 39%       22/61 36%       25/61 41%       23/61 38%       28/61 46%
+timed out (all trials)                        45/305 15%      45/305 15%      96/305 31%      62/305 20%      62/305 20%
+stopped by itself, but failed                 37/260 14%     119/259 46%      77/195 39%      64/243 26%      95/236 40%
+explicit done call, but failed                38/262 15%     124/264 47%      80/198 40%      68/247 28%      99/240 41%
+stopped runs: tested after last edit         178/260 68%     213/259 82%     149/195 76%     175/243 72%     177/236 75%
+stopped runs: edited, never re-ran            71/260 27%      45/259 17%      41/195 21%      64/243 26%      52/236 22%
+stopped runs: no edit step at all              11/260 4%        1/259 0%        5/195 3%        4/243 2%        7/236 3%
+  fail rate if tested                         25/178 14%      91/213 43%      53/149 36%      44/175 25%      74/177 42%
+  fail rate if untested                         9/71 13%       28/45 62%       20/41 49%       18/64 28%       20/52 38%
+  fail rate if no edit                          3/11 27%          0/1 0%         4/5 80%         2/4 50%         1/7 14%
+cells where runs disagree on testing           13/61 21%       19/61 31%       18/61 30%       18/61 30%       17/61 28%
+first action is not a look                    67/305 22%       20/305 7%      41/298 14%      51/305 17%      50/302 17%
+  fail rate if looked first                   65/238 27%     155/285 54%     164/257 64%     110/254 43%     142/252 56%
+  fail rate if not                             10/67 15%        7/20 35%       14/41 34%        9/51 18%       13/50 26%
+runs that fetched from the network             26/305 9%      33/305 11%       27/298 9%       26/305 9%       23/302 8%
+runs that installed packages                 116/305 38%     156/305 51%      95/298 32%      96/305 31%     106/302 35%
+same path, different outcome (cells)            6/61 10%         0/61 0%         1/61 2%         5/61 8%         4/61 7%
+tool calls: same-outcome cells at 2x+          12/37 32%       17/39 44%       18/36 50%       13/38 34%       21/33 64%
+  median max/min, tool calls                       1.50x           1.75x           2.01x           1.74x           2.08x
+agent time: same-outcome cells at 2x+          12/37 32%       16/39 41%       21/36 58%       13/38 34%       25/33 76%
+  median max/min, agent time                       1.51x           1.81x           2.13x           1.72x           2.82x
+log-est. input: same-outcome cells at 2x+       22/37 59%       33/39 85%       29/36 81%       29/38 76%       26/33 79%
+  median max/min, log-est. input                   2.26x           2.52x           4.12x           2.46x           3.72x
+provider input: same-outcome cells at 2x+       22/37 59%       31/39 79%       29/36 81%             - !       26/33 79%
+  median max/min, provider input                   2.46x           2.52x           4.26x             - !           4.07x
+provider counts: prompt never shrinks        100% usable     100% usable     100% usable no per-step counts !     100% usable
+  provider / log-estimated input, median            1.50            1.29            1.33             - !            1.31
+log-est. input spent per pass (M tok)               0.17            1.23            1.29            1.06            1.71
+trials with tokens recorded                 305/305 100%    305/305 100%     298/305 98%        0/305 0%     302/305 99%
+provider input spent per pass (M)                   0.29            1.56            1.82             - !            2.42
+output tokens spent per pass (k)                      20              36              59               -              42
+  cached share of input, median              72% (n=305)     95% (n=305)      0% (n=298)    not recorded      0% (n=302)
+trials with dollar cost recorded            305/305 100%    305/305 100%        0/305 0%        0/305 0%        0/305 0%
+  recorded dollars spent per pass                   0.80            0.07               -               -               -
+
+== 8. Paired by task: Claude-Opus-4.6 against each other arm (all trials) 
+a task is 'every' if the arm passed all its trials, 'never' if none, else 'some'
+ratios: tasks both arms pass every time; per task, other arm's median / Claude-Opus-4.6's median; then the median over tasks
+-- all tasks: Claude-Opus-4.6 (rows) against DeepSeek-V3.2 (columns), 89 tasks
+             every   some  never
+   every        12     17     10
+   some          7     10     13
+   never         0      6     14
+   of the 39 tasks Claude-Opus-4.6 passes every time, DeepSeek-V3.2 passes every time on 12/39 31%
+   of the 19 tasks DeepSeek-V3.2 passes every time, Claude-Opus-4.6 passes every time on 12/19 63%
+   both pass every time (12 tasks), DeepSeek-V3.2 / Claude-Opus-4.6: log-est. input 3.51x (n=12), provider input (see ! in 7) 3.01x (n=12), output tokens 1.44x (n=12), agent time 2.24x (n=12), tool calls 2.73x (n=12)
+   Claude-Opus-4.6 every, DeepSeek-V3.2 never (10): break-filter-js-from-html, circuit-fibsqrt, financial-document-processor, fix-ocaml-gc, kv-store-grpc, large-scale-text-editing, largest-eigenval, qemu-alpine-ssh, rstan-to-pystan, schemelike-metacircular-eval
+   Claude-Opus-4.6 never, DeepSeek-V3.2 every (0): none
+-- all tasks: Claude-Opus-4.6 (rows) against GLM-4.7 (columns), 89 tasks
+             every   some  never
+   every        11     20      8
+   some          3      9     18
+   never         1      1     18
+   of the 39 tasks Claude-Opus-4.6 passes every time, GLM-4.7 passes every time on 11/39 28%
+   of the 15 tasks GLM-4.7 passes every time, Claude-Opus-4.6 passes every time on 11/15 73%
+   both pass every time (11 tasks), GLM-4.7 / Claude-Opus-4.6: log-est. input 2.29x (n=11), provider input (see ! in 7) 1.96x (n=11), output tokens 1.59x (n=11), agent time 1.43x (n=11), tool calls 1.33x (n=11)
+   Claude-Opus-4.6 every, GLM-4.7 never (8): break-filter-js-from-html, circuit-fibsqrt, hf-model-inference, kv-store-grpc, llm-inference-batching-scheduler, rstan-to-pystan, schemelike-metacircular-eval, sqlite-db-truncate
+   Claude-Opus-4.6 never, GLM-4.7 every (1): configure-git-webserver
+-- all tasks: Claude-Opus-4.6 (rows) against GLM-5 (columns), 89 tasks
+             every   some  never
+   every        24     14      1
+   some          5     14     11
+   never         0      4     16
+   of the 39 tasks Claude-Opus-4.6 passes every time, GLM-5 passes every time on 24/39 62%
+   of the 29 tasks GLM-5 passes every time, Claude-Opus-4.6 passes every time on 24/29 83%
+   both pass every time (24 tasks), GLM-5 / Claude-Opus-4.6: log-est. input 2.23x (n=24), provider input (see ! in 7) -, output tokens -, agent time 1.51x (n=24), tool calls 1.29x (n=24)
+   Claude-Opus-4.6 every, GLM-5 never (1): break-filter-js-from-html
+   Claude-Opus-4.6 never, GLM-5 every (0): none
+-- all tasks: Claude-Opus-4.6 (rows) against Kimi-k2.5 (columns), 89 tasks
+             every   some  never
+   every        16     19      4
+   some          1     12     17
+   never         1      4     15
+   of the 39 tasks Claude-Opus-4.6 passes every time, Kimi-k2.5 passes every time on 16/39 41%
+   of the 18 tasks Kimi-k2.5 passes every time, Claude-Opus-4.6 passes every time on 16/18 89%
+   both pass every time (16 tasks), Kimi-k2.5 / Claude-Opus-4.6: log-est. input 2.07x (n=16), provider input (see ! in 7) 1.84x (n=16), output tokens 1.41x (n=16), agent time 1.56x (n=16), tool calls 1.26x (n=16)
+   Claude-Opus-4.6 every, Kimi-k2.5 never (4): break-filter-js-from-html, circuit-fibsqrt, financial-document-processor, qemu-alpine-ssh
+   Claude-Opus-4.6 never, Kimi-k2.5 every (1): configure-git-webserver
+-- tasks Terminal-Bench 2.1 did not revise: Claude-Opus-4.6 (rows) against DeepSeek-V3.2 (columns), 61 tasks
+             every   some  never
+   every        12     13      8
+   some          6      8     10
+   never         0      1      3
+   of the 33 tasks Claude-Opus-4.6 passes every time, DeepSeek-V3.2 passes every time on 12/33 36%
+   of the 18 tasks DeepSeek-V3.2 passes every time, Claude-Opus-4.6 passes every time on 12/18 67%
+   both pass every time (12 tasks), DeepSeek-V3.2 / Claude-Opus-4.6: log-est. input 3.51x (n=12), provider input (see ! in 7) 3.01x (n=12), output tokens 1.44x (n=12), agent time 2.24x (n=12), tool calls 2.73x (n=12)
+   Claude-Opus-4.6 every, DeepSeek-V3.2 never (8): break-filter-js-from-html, circuit-fibsqrt, fix-ocaml-gc, kv-store-grpc, large-scale-text-editing, largest-eigenval, qemu-alpine-ssh, schemelike-metacircular-eval
+   Claude-Opus-4.6 never, DeepSeek-V3.2 every (0): none
+-- tasks Terminal-Bench 2.1 did not revise: Claude-Opus-4.6 (rows) against GLM-4.7 (columns), 61 tasks
+             every   some  never
+   every        11     16      6
+   some          1      9     14
+   never         0      0      4
+   of the 33 tasks Claude-Opus-4.6 passes every time, GLM-4.7 passes every time on 11/33 33%
+   of the 12 tasks GLM-4.7 passes every time, Claude-Opus-4.6 passes every time on 11/12 92%
+   both pass every time (11 tasks), GLM-4.7 / Claude-Opus-4.6: log-est. input 2.29x (n=11), provider input (see ! in 7) 1.96x (n=11), output tokens 1.59x (n=11), agent time 1.43x (n=11), tool calls 1.33x (n=11)
+   Claude-Opus-4.6 every, GLM-4.7 never (6): break-filter-js-from-html, circuit-fibsqrt, kv-store-grpc, llm-inference-batching-scheduler, schemelike-metacircular-eval, sqlite-db-truncate
+   Claude-Opus-4.6 never, GLM-4.7 every (0): none
+-- tasks Terminal-Bench 2.1 did not revise: Claude-Opus-4.6 (rows) against GLM-5 (columns), 61 tasks
+             every   some  never
+   every        20     12      1
+   some          4     10     10
+   never         0      1      3
+   of the 33 tasks Claude-Opus-4.6 passes every time, GLM-5 passes every time on 20/33 61%
+   of the 24 tasks GLM-5 passes every time, Claude-Opus-4.6 passes every time on 20/24 83%
+   both pass every time (20 tasks), GLM-5 / Claude-Opus-4.6: log-est. input 2.21x (n=20), provider input (see ! in 7) -, output tokens -, agent time 1.51x (n=20), tool calls 1.30x (n=20)
+   Claude-Opus-4.6 every, GLM-5 never (1): break-filter-js-from-html
+   Claude-Opus-4.6 never, GLM-5 every (0): none
+-- tasks Terminal-Bench 2.1 did not revise: Claude-Opus-4.6 (rows) against Kimi-k2.5 (columns), 61 tasks
+             every   some  never
+   every        14     16      3
+   some          0     11     13
+   never         0      1      3
+   of the 33 tasks Claude-Opus-4.6 passes every time, Kimi-k2.5 passes every time on 14/33 42%
+   of the 14 tasks Kimi-k2.5 passes every time, Claude-Opus-4.6 passes every time on 14/14 100%
+   both pass every time (14 tasks), Kimi-k2.5 / Claude-Opus-4.6: log-est. input 2.07x (n=14), provider input (see ! in 7) 1.90x (n=14), output tokens 1.48x (n=14), agent time 1.61x (n=14), tool calls 1.32x (n=14)
+   Claude-Opus-4.6 every, Kimi-k2.5 never (3): break-filter-js-from-html, circuit-fibsqrt, qemu-alpine-ssh
+   Claude-Opus-4.6 never, Kimi-k2.5 every (0): none
+
+== 9. Pre-registered hypotheses, scored mechanically =====================
+thresholds: M1_max_hold=0.6, M2_min_some=0.5, M3_ratio=1.5, M3_points=0.05, M4_ratio=2.0, M5_spread=2.0, M5_min_share=0.4, model_arms_share=0.75, H1_min_flip=0.1, H2_min_stopfail=0.08, H3_ratio=1.5, H3_zero_floor=0.05, harness_arms_share=0.8
+-- scope: all tasks   [alongside]
+   DeepSeek-V3.2 against Claude-Opus-4.6: M1 held 12/39 31%; M2 'some' among not held 17/27 63%; M3 stopped-but-failed 183/354 52% against 92/364 25%; M4 log-est. input per pass 4.65x (1.31M against 0.28M)
+   GLM-4.7 against Claude-Opus-4.6: M1 held 11/39 28%; M2 'some' among not held 20/28 71%; M3 stopped-but-failed 139/284 49% against 92/364 25%; M4 log-est. input per pass 4.94x (1.39M against 0.28M)
+   GLM-5 against Claude-Opus-4.6: M1 held 24/39 62%; M2 'some' among not held 14/15 93%; M3 stopped-but-failed 113/334 34% against 92/364 25%; M4 log-est. input per pass 5.18x (1.46M against 0.28M)
+   Kimi-k2.5 against Claude-Opus-4.6: M1 held 16/39 41%; M2 'some' among not held 19/23 83%; M3 stopped-but-failed 161/344 47% against 92/364 25%; M4 log-est. input per pass 5.83x (1.65M against 0.28M)
+   M1: SUPPORTED, holds for 3 of 4 (needs 3); without GLM-5: 3 of 3
+   M2: SUPPORTED, holds for 4 of 4 (needs 3); without GLM-5: 3 of 3
+   M3: SUPPORTED, holds for 3 of 4 (needs 3); without GLM-5: 3 of 3
+   M4: SUPPORTED, holds for 4 of 4 (needs 3); without GLM-5: 3 of 3
+   M5 same-outcome tasks at 2x+ log-est. input: Claude-Opus-4.6 35/59 59%, DeepSeek-V3.2 46/56 82%, GLM-4.7 49/59 83%, GLM-5 41/57 72%, Kimi-k2.5 44/54 81%
+   M5: SUPPORTED, holds for 5 of 5 (needs 5)
+-- scope: tasks Terminal-Bench 2.1 did not revise   [PRIMARY]
+   DeepSeek-V3.2 against Claude-Opus-4.6: M1 held 12/33 36%; M2 'some' among not held 13/21 62%; M3 stopped-but-failed 119/259 46% against 37/260 14%; M4 log-est. input per pass 7.30x (1.23M against 0.17M)
+   GLM-4.7 against Claude-Opus-4.6: M1 held 11/33 33%; M2 'some' among not held 16/22 73%; M3 stopped-but-failed 77/195 39% against 37/260 14%; M4 log-est. input per pass 7.65x (1.29M against 0.17M)
+   GLM-5 against Claude-Opus-4.6: M1 held 20/33 61%; M2 'some' among not held 12/13 92%; M3 stopped-but-failed 64/243 26% against 37/260 14%; M4 log-est. input per pass 6.29x (1.06M against 0.17M)
+   Kimi-k2.5 against Claude-Opus-4.6: M1 held 14/33 42%; M2 'some' among not held 16/19 84%; M3 stopped-but-failed 95/236 40% against 37/260 14%; M4 log-est. input per pass 10.19x (1.71M against 0.17M)
+   M1: SUPPORTED, holds for 3 of 4 (needs 3); without GLM-5: 3 of 3
+   M2: SUPPORTED, holds for 4 of 4 (needs 3); without GLM-5: 3 of 3
+   M3: SUPPORTED, holds for 4 of 4 (needs 3); without GLM-5: 3 of 3
+   M4: SUPPORTED, holds for 4 of 4 (needs 3); without GLM-5: 3 of 3
+   M5 same-outcome tasks at 2x+ log-est. input: Claude-Opus-4.6 22/37 59%, DeepSeek-V3.2 33/39 85%, GLM-4.7 29/36 81%, GLM-5 29/38 76%, Kimi-k2.5 26/33 79%
+   M5: SUPPORTED, holds for 5 of 5 (needs 5)
+
+runs written: 2,212 under experiments/002-terminal-bench-models/runs
+index: experiments/002-terminal-bench/out/harbor.duckdb (trials_models_confirmation, calls_models_confirmation)

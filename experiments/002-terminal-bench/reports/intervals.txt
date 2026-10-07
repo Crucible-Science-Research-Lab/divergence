@@ -1,0 +1,235 @@
+Note two: intervals and extra verdict lines, 2026-10-03 09:04 UTC
+source harbor.duckdb; 90% interval = 5th to 95th percentile over 2,000 resamples of tasks (with replacement, seed 20261002)
+verdicts are decided on the point values; the intervals are descriptive
+
+== model axis ============================================================
+endings other than 'completed' (all 89 tasks):
+  AddTestsDirError               GLM-5 3, Kimi-k2.5 1   [dropped in the environment-error line]
+  AgentTimeoutError              Claude-Opus-4.6 81, DeepSeek-V3.2 90, GLM-4.7 143, GLM-5 108, Kimi-k2.5 91   [kept as a failure]
+  DaytonaError                   GLM-4.7 17, Kimi-k2.5 9   [dropped in the environment-error line]
+  DownloadVerifierDirError       GLM-4.7 1   [dropped in the environment-error line]
+  RewardFileNotFoundError        DeepSeek-V3.2 1   [kept as a failure]
+point values and verdicts match the confirmation report on both scopes
+
+-- model axis, PRIMARY scope: 61 tasks; 2,000 resamples of tasks, seed 20261002
+measure                                        arm              point              90% interval
+passed (all trials)                            Claude-Opus-4.6  230/305 75.4%      68.5% to 82.3%
+passed (all trials)                            DeepSeek-V3.2    143/305 46.9%      38.0% to 55.7%
+passed (all trials)                            GLM-4.7          120/305 39.3%      31.1% to 47.5%
+passed (all trials)                            GLM-5            186/305 61.0%      52.5% to 69.5%
+passed (all trials)                            Kimi-k2.5        147/305 48.2%      40.0% to 56.7%
+tasks that flip                                Claude-Opus-4.6  24/61 39.3%        29.5% to 49.2%
+tasks that flip                                DeepSeek-V3.2    22/61 36.1%        26.2% to 45.9%
+tasks that flip                                GLM-4.7          25/61 41.0%        31.1% to 50.8%
+tasks that flip                                GLM-5            23/61 37.7%        27.9% to 47.5%
+tasks that flip                                Kimi-k2.5        28/61 45.9%        36.1% to 55.7%
+stopped by itself, but failed                  Claude-Opus-4.6  37/260 14.2%       8.8% to 20.2%
+stopped by itself, but failed                  DeepSeek-V3.2    119/259 45.9%      36.8% to 55.6%
+stopped by itself, but failed                  GLM-4.7          77/195 39.5%       29.5% to 49.7%
+stopped by itself, but failed                  GLM-5            64/243 26.3%       18.6% to 34.5%
+stopped by itself, but failed                  Kimi-k2.5        95/236 40.3%       31.8% to 49.3%
+M1 held, of the reference's every-time tasks   DeepSeek-V3.2    12/33 36.4%        22.9% to 50.0%
+M1 held, of the reference's every-time tasks   GLM-4.7          11/33 33.3%        20.7% to 48.3%
+M1 held, of the reference's every-time tasks   GLM-5            20/33 60.6%        46.7% to 75.0%
+M1 held, of the reference's every-time tasks   Kimi-k2.5        14/33 42.4%        28.6% to 56.7%
+M2 'some' among the tasks not held             DeepSeek-V3.2    13/21 61.9%        43.5% to 80.0%
+M2 'some' among the tasks not held             GLM-4.7          16/22 72.7%        56.5% to 88.2%
+M2 'some' among the tasks not held             GLM-5            12/13 92.3%        77.8% to 100.0%
+M2 'some' among the tasks not held             Kimi-k2.5        16/19 84.2%        68.8% to 100.0%
+M3 stopped-but-failed, ratio to reference      DeepSeek-V3.2    3.23x              2.30x to 4.97x
+M3 stopped-but-failed, ratio to reference      GLM-4.7          2.77x              1.99x to 4.22x
+M3 stopped-but-failed, ratio to reference      GLM-5            1.85x              1.33x to 2.70x
+M3 stopped-but-failed, ratio to reference      Kimi-k2.5        2.83x              2.13x to 4.14x
+M3 stopped-but-failed, difference              DeepSeek-V3.2    +31.7 pts          +23.2 to +40.6 pts
+M3 stopped-but-failed, difference              GLM-4.7          +25.3 pts          +16.4 to +34.5 pts
+M3 stopped-but-failed, difference              GLM-5            +12.1 pts          +5.2 to +18.6 pts
+M3 stopped-but-failed, difference              Kimi-k2.5        +26.0 pts          +19.1 to +33.4 pts
+M4 log-est. input per pass, ratio              DeepSeek-V3.2    7.30x              3.84x to 13.93x
+M4 log-est. input per pass, ratio              GLM-4.7          7.65x              5.11x to 11.75x
+M4 log-est. input per pass, ratio              GLM-5            6.29x              4.69x to 8.47x
+M4 log-est. input per pass, ratio              Kimi-k2.5        10.19x             7.48x to 14.04x
+M5 same-outcome tasks at 2x+ input             Claude-Opus-4.6  22/37 59.5%        45.7% to 72.7%
+M5 same-outcome tasks at 2x+ input             DeepSeek-V3.2    33/39 84.6%        75.0% to 94.3%
+M5 same-outcome tasks at 2x+ input             GLM-4.7          29/36 80.6%        69.4% to 90.9%
+M5 same-outcome tasks at 2x+ input             GLM-5            29/38 76.3%        64.9% to 87.5%
+M5 same-outcome tasks at 2x+ input             Kimi-k2.5        26/33 78.8%        66.7% to 90.2%
+verdicts as scored (point values):
+   M1 SUPPORTED, holds for 3 of 4 (needs 3)
+   M2 SUPPORTED, holds for 4 of 4 (needs 3)
+   M3 SUPPORTED, holds for 4 of 4 (needs 3)
+   M4 SUPPORTED, holds for 4 of 4 (needs 3)
+   M5 SUPPORTED, holds for 5 of 5 (needs 5)
+verdicts without GLM-5:
+   M1 SUPPORTED, holds for 3 of 3 (needs 3)
+   M2 SUPPORTED, holds for 3 of 3 (needs 3)
+   M3 SUPPORTED, holds for 3 of 3 (needs 3)
+   M4 SUPPORTED, holds for 3 of 3 (needs 3)
+   M5 SUPPORTED, holds for 4 of 4 (needs 4)
+without the 21 trials that ended in an environment error:
+   DeepSeek-V3.2 against Claude-Opus-4.6: passed 143/305 46.9%; M1 held 12/33 36.4%; M2 'some' 13/21 61.9%; M3 119/259 45.9% against 37/260 14.2%; M4 7.30x
+   GLM-4.7 against Claude-Opus-4.6: passed 120/291 41.2%; M1 held 11/33 33.3%; M2 'some' 16/22 72.7%; M3 77/195 39.5% against 37/260 14.2%; M4 7.12x
+   GLM-5 against Claude-Opus-4.6: passed 186/305 61.0%; M1 held 20/33 60.6%; M2 'some' 12/13 92.3%; M3 64/243 26.3% against 37/260 14.2%; M4 6.29x
+   Kimi-k2.5 against Claude-Opus-4.6: passed 147/298 49.3%; M1 held 14/33 42.4%; M2 'some' 16/19 84.2%; M3 95/236 40.3% against 37/260 14.2%; M4 10.12x
+   M5: Claude-Opus-4.6 22/37 59.5%, DeepSeek-V3.2 33/39 84.6%, GLM-4.7 28/36 77.8%, GLM-5 29/38 76.3%, Kimi-k2.5 26/33 78.8%
+   M1 SUPPORTED, holds for 3 of 4 (needs 3)
+   M2 SUPPORTED, holds for 4 of 4 (needs 3)
+   M3 SUPPORTED, holds for 4 of 4 (needs 3)
+   M4 SUPPORTED, holds for 4 of 4 (needs 3)
+   M5 SUPPORTED, holds for 5 of 5 (needs 5)
+
+-- model axis, all tasks (alongside): 89 tasks; 2,000 resamples of tasks, seed 20261002
+measure                                        arm              point              90% interval
+passed (all trials)                            Claude-Opus-4.6  280/445 62.9%      55.7% to 69.7%
+passed (all trials)                            DeepSeek-V3.2    176/445 39.6%      32.1% to 46.7%
+passed (all trials)                            GLM-4.7          147/445 33.0%      26.5% to 40.0%
+passed (all trials)                            GLM-5            231/445 51.9%      44.5% to 59.1%
+passed (all trials)                            Kimi-k2.5        189/445 42.5%      35.3% to 49.4%
+tasks that flip                                Claude-Opus-4.6  30/89 33.7%        25.8% to 41.6%
+tasks that flip                                DeepSeek-V3.2    33/89 37.1%        29.2% to 46.1%
+tasks that flip                                GLM-4.7          30/89 33.7%        25.8% to 41.6%
+tasks that flip                                GLM-5            32/89 36.0%        28.1% to 44.9%
+tasks that flip                                Kimi-k2.5        35/89 39.3%        30.3% to 48.3%
+stopped by itself, but failed                  Claude-Opus-4.6  92/364 25.3%       18.9% to 32.0%
+stopped by itself, but failed                  DeepSeek-V3.2    183/354 51.7%      43.5% to 60.0%
+stopped by itself, but failed                  GLM-4.7          139/284 48.9%      39.7% to 58.3%
+stopped by itself, but failed                  GLM-5            113/334 33.8%      26.2% to 41.7%
+stopped by itself, but failed                  Kimi-k2.5        161/344 46.8%      38.8% to 55.2%
+M1 held, of the reference's every-time tasks   DeepSeek-V3.2    12/39 30.8%        18.9% to 43.8%
+M1 held, of the reference's every-time tasks   GLM-4.7          11/39 28.2%        16.7% to 41.2%
+M1 held, of the reference's every-time tasks   GLM-5            24/39 61.5%        48.6% to 73.7%
+M1 held, of the reference's every-time tasks   Kimi-k2.5        16/39 41.0%        28.2% to 54.3%
+M2 'some' among the tasks not held             DeepSeek-V3.2    17/27 63.0%        47.4% to 77.4%
+M2 'some' among the tasks not held             GLM-4.7          20/28 71.4%        56.0% to 84.6%
+M2 'some' among the tasks not held             GLM-5            14/15 93.3%        81.0% to 100.0%
+M2 'some' among the tasks not held             Kimi-k2.5        19/23 82.6%        68.4% to 95.0%
+M3 stopped-but-failed, ratio to reference      DeepSeek-V3.2    2.05x              1.66x to 2.66x
+M3 stopped-but-failed, ratio to reference      GLM-4.7          1.94x              1.54x to 2.50x
+M3 stopped-but-failed, ratio to reference      GLM-5            1.34x              1.10x to 1.66x
+M3 stopped-but-failed, ratio to reference      Kimi-k2.5        1.85x              1.52x to 2.35x
+M3 stopped-but-failed, difference              DeepSeek-V3.2    +26.4 pts          +19.0 to +34.5 pts
+M3 stopped-but-failed, difference              GLM-4.7          +23.7 pts          +15.2 to +32.0 pts
+M3 stopped-but-failed, difference              GLM-5            +8.6 pts           +2.7 to +14.6 pts
+M3 stopped-but-failed, difference              Kimi-k2.5        +21.5 pts          +14.7 to +28.7 pts
+M4 log-est. input per pass, ratio              DeepSeek-V3.2    4.65x              2.72x to 7.80x
+M4 log-est. input per pass, ratio              GLM-4.7          4.94x              3.40x to 7.45x
+M4 log-est. input per pass, ratio              GLM-5            5.18x              3.17x to 8.23x
+M4 log-est. input per pass, ratio              Kimi-k2.5        5.83x              3.95x to 8.50x
+M5 same-outcome tasks at 2x+ input             Claude-Opus-4.6  35/59 59.3%        48.4% to 69.6%
+M5 same-outcome tasks at 2x+ input             DeepSeek-V3.2    46/56 82.1%        73.2% to 90.2%
+M5 same-outcome tasks at 2x+ input             GLM-4.7          49/59 83.1%        74.6% to 90.8%
+M5 same-outcome tasks at 2x+ input             GLM-5            41/57 71.9%        62.3% to 81.5%
+M5 same-outcome tasks at 2x+ input             Kimi-k2.5        44/54 81.5%        72.0% to 90.0%
+verdicts as scored (point values):
+   M1 SUPPORTED, holds for 3 of 4 (needs 3)
+   M2 SUPPORTED, holds for 4 of 4 (needs 3)
+   M3 SUPPORTED, holds for 3 of 4 (needs 3)
+   M4 SUPPORTED, holds for 4 of 4 (needs 3)
+   M5 SUPPORTED, holds for 5 of 5 (needs 5)
+verdicts without GLM-5:
+   M1 SUPPORTED, holds for 3 of 3 (needs 3)
+   M2 SUPPORTED, holds for 3 of 3 (needs 3)
+   M3 SUPPORTED, holds for 3 of 3 (needs 3)
+   M4 SUPPORTED, holds for 3 of 3 (needs 3)
+   M5 SUPPORTED, holds for 4 of 4 (needs 4)
+without the 31 trials that ended in an environment error:
+   DeepSeek-V3.2 against Claude-Opus-4.6: passed 176/445 39.6%; M1 held 12/39 30.8%; M2 'some' 17/27 63.0%; M3 183/354 51.7% against 92/364 25.3%; M4 4.65x
+   GLM-4.7 against Claude-Opus-4.6: passed 147/427 34.4%; M1 held 11/39 28.2%; M2 'some' 20/28 71.4%; M3 139/284 48.9% against 92/364 25.3%; M4 4.65x
+   GLM-5 against Claude-Opus-4.6: passed 231/442 52.3%; M1 held 25/39 64.1%; M2 'some' 13/14 92.9%; M3 113/334 33.8% against 92/364 25.3%; M4 5.17x
+   Kimi-k2.5 against Claude-Opus-4.6: passed 189/435 43.4%; M1 held 16/39 41.0%; M2 'some' 19/23 82.6%; M3 161/344 46.8% against 92/364 25.3%; M4 5.72x
+   M5: Claude-Opus-4.6 35/59 59.3%, DeepSeek-V3.2 46/56 82.1%, GLM-4.7 48/59 81.4%, GLM-5 42/58 72.4%, Kimi-k2.5 44/55 80.0%
+   M1 SUPPORTED, holds for 3 of 4 (needs 3)
+   M2 SUPPORTED, holds for 4 of 4 (needs 3)
+   M3 SUPPORTED, holds for 3 of 4 (needs 3)
+   M4 SUPPORTED, holds for 4 of 4 (needs 3)
+   M5 SUPPORTED, holds for 5 of 5 (needs 5)
+
+== harness axis ============================================================
+endings other than 'completed' (all 89 tasks):
+  AgentTimeoutError              Judy 83, Meta-Harness 35, Terminus-KIRA 78, Terminus2 81, WozCode 50   [kept as a failure]
+  EnvironmentStartTimeoutError   Terminus-KIRA 3   [dropped in the environment-error line]
+  VerifierTimeoutError           Judy 3, WozCode 2   [kept as a failure]
+point values and verdicts match the confirmation report on both scopes
+
+-- harness axis, PRIMARY scope: 61 tasks; 2,000 resamples of tasks, seed 20261002
+measure                                        arm              point              90% interval
+passed (all trials)                            Judy             250/305 82.0%      75.7% to 87.9%
+passed (all trials)                            Meta-Harness     264/305 86.6%      81.0% to 91.5%
+passed (all trials)                            Terminus-KIRA    258/305 84.6%      78.7% to 90.2%
+passed (all trials)                            Terminus2        230/305 75.4%      68.5% to 82.3%
+passed (all trials)                            WozCode          241/305 79.0%      72.1% to 85.9%
+H1 tasks that flip                             Judy             19/61 31.1%        21.3% to 41.0%
+H1 tasks that flip                             Meta-Harness     16/61 26.2%        16.4% to 36.1%
+H1 tasks that flip                             Terminus-KIRA    16/60 26.7%        18.0% to 36.7%
+H1 tasks that flip                             Terminus2        24/61 39.3%        29.5% to 49.2%
+H1 tasks that flip                             WozCode          19/61 31.1%        21.3% to 41.0%
+H2 stopped by itself, but failed               Judy             26/262 9.9%        5.6% to 14.8%
+H2 stopped by itself, but failed               Meta-Harness     33/294 11.2%       6.5% to 16.4%
+H2 stopped by itself, but failed               Terminus-KIRA    21/264 8.0%        4.3% to 12.1%
+H2 stopped by itself, but failed               Terminus2        37/260 14.2%       8.8% to 20.2%
+H2 stopped by itself, but failed               WozCode          43/279 15.4%       10.0% to 21.1%
+H3 flips, tasks in every harness               Judy             18/60 30.0%        20.7% to 39.3%
+H3 flips, tasks in every harness               Meta-Harness     16/60 26.7%        16.9% to 36.2%
+H3 flips, tasks in every harness               Terminus-KIRA    16/60 26.7%        18.0% to 36.7%
+H3 flips, tasks in every harness               Terminus2        24/60 40.0%        29.5% to 50.8%
+H3 flips, tasks in every harness               WozCode          18/60 30.0%        20.7% to 39.7%
+H3 stopped-but-failed, same tasks              Judy             26/261 10.0%       5.6% to 14.8%
+H3 stopped-but-failed, same tasks              Meta-Harness     33/289 11.4%       6.6% to 16.7%
+H3 stopped-but-failed, same tasks              Terminus-KIRA    21/264 8.0%        4.3% to 12.1%
+H3 stopped-but-failed, same tasks              Terminus2        37/260 14.2%       8.8% to 20.2%
+H3 stopped-but-failed, same tasks              WozCode          43/278 15.5%       10.1% to 21.3%
+H3 flips, highest / lowest                                      1.50x              1.33x to 2.40x
+H3 stopped-but-failed, highest / lowest                         1.94x              1.53x to 3.30x
+verdicts as scored (point values):
+   H1 SUPPORTED, holds for 5 of 5 (needs 4)
+   H2 SUPPORTED, holds for 4 of 5 (needs 4)
+   H3 SUPPORTED (flips holds, stopped-but-failed holds; needs both)
+without the 3 trials that ended in an environment error:
+   passed: Judy 250/305 82.0%, Meta-Harness 264/305 86.6%, Terminus-KIRA 258/302 85.4%, Terminus2 230/305 75.4%, WozCode 241/305 79.0%
+   H1 flips: Judy 19/61 31.1%, Meta-Harness 16/61 26.2%, Terminus-KIRA 16/60 26.7%, Terminus2 24/61 39.3%, WozCode 19/61 31.1%
+   H2 stopped-but-failed: Judy 26/262 9.9%, Meta-Harness 33/294 11.2%, Terminus-KIRA 21/264 8.0%, Terminus2 37/260 14.2%, WozCode 43/279 15.4%
+   H3 highest / lowest: flips 1.50x, stopped-but-failed 1.94x
+   H1 SUPPORTED, holds for 5 of 5 (needs 4)
+   H2 SUPPORTED, holds for 4 of 5 (needs 4)
+   H3 SUPPORTED (flips holds, stopped-but-failed holds; needs both)
+
+-- harness axis, all tasks (alongside): 89 tasks; 2,000 resamples of tasks, seed 20261002
+measure                                        arm              point              90% interval
+passed (all trials)                            Judy             320/445 71.9%      65.2% to 78.0%
+passed (all trials)                            Meta-Harness     340/445 76.4%      70.1% to 82.5%
+passed (all trials)                            Terminus-KIRA    331/445 74.4%      67.6% to 80.9%
+passed (all trials)                            Terminus2        280/445 62.9%      55.7% to 69.7%
+passed (all trials)                            WozCode          303/445 68.1%      61.1% to 75.1%
+H1 tasks that flip                             Judy             32/89 36.0%        28.1% to 43.8%
+H1 tasks that flip                             Meta-Harness     25/89 28.1%        20.2% to 36.0%
+H1 tasks that flip                             Terminus-KIRA    23/88 26.1%        18.2% to 33.7%
+H1 tasks that flip                             Terminus2        30/89 33.7%        25.8% to 41.6%
+H1 tasks that flip                             WozCode          24/89 27.0%        19.1% to 36.0%
+H2 stopped by itself, but failed               Judy             65/359 18.1%       12.9% to 23.5%
+H2 stopped by itself, but failed               Meta-Harness     75/410 18.3%       12.6% to 24.1%
+H2 stopped by itself, but failed               Terminus-KIRA    54/364 14.8%       9.7% to 20.5%
+H2 stopped by itself, but failed               Terminus2        92/364 25.3%       18.9% to 32.0%
+H2 stopped by itself, but failed               WozCode          96/393 24.4%       17.9% to 31.1%
+H3 flips, tasks in every harness               Judy             31/88 35.2%        27.0% to 43.2%
+H3 flips, tasks in every harness               Meta-Harness     25/88 28.4%        20.7% to 36.8%
+H3 flips, tasks in every harness               Terminus-KIRA    23/88 26.1%        18.2% to 33.7%
+H3 flips, tasks in every harness               Terminus2        30/88 34.1%        26.1% to 42.5%
+H3 flips, tasks in every harness               WozCode          23/88 26.1%        18.4% to 34.8%
+H3 stopped-but-failed, same tasks              Judy             65/358 18.2%       13.0% to 23.6%
+H3 stopped-but-failed, same tasks              Meta-Harness     75/405 18.5%       12.8% to 24.4%
+H3 stopped-but-failed, same tasks              Terminus-KIRA    54/364 14.8%       9.7% to 20.5%
+H3 stopped-but-failed, same tasks              Terminus2        92/364 25.3%       18.9% to 32.0%
+H3 stopped-but-failed, same tasks              WozCode          96/392 24.5%       18.0% to 31.2%
+H3 flips, highest / lowest                                      1.35x              1.27x to 2.12x
+H3 stopped-but-failed, highest / lowest                         1.70x              1.42x to 2.46x
+verdicts as scored (point values):
+   H1 SUPPORTED, holds for 5 of 5 (needs 4)
+   H2 SUPPORTED, holds for 5 of 5 (needs 4)
+   H3 NOT SUPPORTED (flips does not hold, stopped-but-failed holds; needs both)
+without the 3 trials that ended in an environment error:
+   passed: Judy 320/445 71.9%, Meta-Harness 340/445 76.4%, Terminus-KIRA 331/442 74.9%, Terminus2 280/445 62.9%, WozCode 303/445 68.1%
+   H1 flips: Judy 32/89 36.0%, Meta-Harness 25/89 28.1%, Terminus-KIRA 23/88 26.1%, Terminus2 30/89 33.7%, WozCode 24/89 27.0%
+   H2 stopped-but-failed: Judy 65/359 18.1%, Meta-Harness 75/410 18.3%, Terminus-KIRA 54/364 14.8%, Terminus2 92/364 25.3%, WozCode 96/393 24.4%
+   H3 highest / lowest: flips 1.35x, stopped-but-failed 1.70x
+   H1 SUPPORTED, holds for 5 of 5 (needs 4)
+   H2 SUPPORTED, holds for 5 of 5 (needs 4)
+   H3 NOT SUPPORTED (flips does not hold, stopped-but-failed holds; needs both)

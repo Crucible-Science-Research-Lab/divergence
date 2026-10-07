@@ -1,0 +1,69 @@
+{
+ "note": "002-terminal-bench",
+ "preregistration": {
+  "file": "prereg/002-terminal-bench.yaml",
+  "sha256": "53293b6d519dc2a3c6410b99f39b37246375177d12fe01ad04719765610a4248"
+ },
+ "axes": {
+  "model": {
+   "held_fixed": "Terminus2",
+   "folder": "models",
+   "submissions": [
+    "Terminus2__Claude-Opus-4.6",
+    "Terminus2__DeepSeek-V3.2",
+    "Terminus2__GLM-4.7",
+    "Terminus2__GLM-5",
+    "Terminus2__Kimi-k2.5"
+   ]
+  },
+  "harness": {
+   "held_fixed": "claude-opus-4.6",
+   "folder": "harnesses",
+   "submissions": [
+    "Judy__Claude-Opus-4.6",
+    "Meta-Harness__Claude-Opus-4.6",
+    "Terminus-KIRA__Claude-Opus-4.6",
+    "Terminus2__Claude-Opus-4.6",
+    "WozCode__Claude-Opus-4.6"
+   ]
+  }
+ },
+ "tasks_revised_in_tb21": {
+  "source": "https://www.tbench.ai/news/terminal-bench-2-1",
+  "read": "2026-10-02",
+  "tasks": [
+   "adaptive-rejection-sampler",
+   "build-pmars",
+   "build-pov-ray",
+   "caffe-cifar-10",
+   "compile-compcert",
+   "configure-git-webserver",
+   "crack-7z-hash",
+   "extract-moves-from-video",
+   "filter-js-from-html",
+   "financial-document-processor",
+   "fix-git",
+   "gpt2-codegolf",
+   "hf-model-inference",
+   "install-windows-3.11",
+   "make-doom-for-mips",
+   "mcmc-sampling-stan",
+   "mteb-leaderboard",
+   "mteb-retrieve",
+   "overfull-hbox",
+   "polyglot-c-py",
+   "polyglot-rust-c",
+   "protein-assembly",
+   "query-optimize",
+   "rstan-to-pystan",
+   "sam-cell-seg",
+   "torch-pipeline-parallelism",
+   "torch-tensor-parallelism",
+   "train-fasttext"
+  ]
+ },
+ "task_repo": {
+  "url": "https://github.com/laude-institute/terminal-bench-2",
+  "commit": "2fd12b88aafdd04a52c298e3940bcb189f9766d6"
+ }
+}

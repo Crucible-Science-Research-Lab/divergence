@@ -16,6 +16,7 @@ By [Crucible Science](https://cruciblescience.com).
 | # | Note | Data | Published |
 |---|---|---|---|
 | 001 | [Same customer, same request, four runs](experiments/001-tau-retail/NOTE.md) | Sierra's τ²-bench retail results, 216 runs, 3 models | October 2026 · tag `001-tau-retail-v1` |
+| 002 | [Same task, cheaper model, five runs](experiments/002-terminal-bench/NOTE.md) | Harbor's Terminal-Bench 2.0 leaderboard, 4,005 trials, 9 submissions | October 2026 · tag `002-terminal-bench-v1` |
 
 Each note lives in its own folder under `experiments/`, with its pre-registration,
 analysis, exhibits and the scripts to rebuild it. The run files are not stored here: the
@@ -53,6 +54,7 @@ and endings show pass or fail. Click two runs to compare them step by step.
 ```
 divergence/
   importers/tau.py    τ²-bench results  →  one OpenTelemetry JSON trace per run
+  importers/harbor.py Harbor trials     →  the same traces, an index and the scored report (note 002)
   analyse.py          traces            →  analysis.json (trees, splits, costs, hypotheses)
   trace.py            the trace format shared by importers and our own harness
 viewer/index.html     analysis.json     →  trajectory trees, one self-contained page
@@ -65,7 +67,9 @@ that writes, on each run's root span: `divergence.run_id`, `divergence.task_id`,
 `divergence.termination`, `divergence.turns` and `gen_ai.request.model`, plus
 `divergence.verdict` (`pass` or `fail`) and `divergence.cost_usd` when they are known.
 
-Requirements: Python 3.10 or later, with PyYAML (`pip install pyyaml`).
+Requirements: Python 3.10 or later, with PyYAML (`pip install pyyaml`). Note 002 also needs pandas
+and duckdb, and huggingface_hub to download its inputs; its
+[README](experiments/002-terminal-bench/README.md#reproduce-it) has the one line.
 
 ## Run it on your own agent
 

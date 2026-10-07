@@ -19,3 +19,9 @@ __pycache__/
 venv/
 .DS_Store
  
+# note 002: the inputs (downloaded or linked) and everything the importer generates
+experiments/*/raw
+experiments/*/out/
+experiments/*/tasks
+experiments/002-terminal-bench-models/
+experiments/002-terminal-bench-harnesses/
