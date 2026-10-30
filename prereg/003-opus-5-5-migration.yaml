@@ -1,0 +1,397 @@
+# prereg/003-opus-5-5-migration.yaml
+# FROZEN v3, 30 October 2026. Committed with the analysis code before any confirmation trial was opened.
+# Pre-registration for note three. Written before either confirmation job was downloaded.
+# This file fixes the questions, arms, definitions, the one test every question is judged by,
+# and what will not be claimed. It is frozen and committed publicly, with the analysis code,
+# before any confirmation trial is opened. Any later change of plan is listed in the note under
+# "deviations".
+# v2 added what the exploration arm taught (28 and 29 Oct): settings checks, API errors, model
+# switches, sub-agents, the step key and the split measures.
+# v3 (29 Oct) replaces the per-question thresholds with one test, the same-model baseline;
+# fixes "path changed" as steps or shared prefix (the first-split category is drawn, not scored);
+# makes U3 and U6 reported measures; adds the cost clause and the task count for every check.
+# The plain-words glossary for readers closes the file.
+# Frozen 30 Oct after a fresh-eyes read: verdicts use the frozen step key; the glossary's
+# 1 in 40 matches the test; path changed and U6 name their units; paths and status updated.
+
+title: "What changes in Claude Code when Opus 5 becomes Opus 5.5 (Terminal-Bench 4.0)"
+author: Crucible Science
+written: 2026-10-27
+revised: 2026-10-30
+status: frozen v3, 30 Oct 2026, confirmation unopened
+
+data:
+  source: Harbor Hub, Terminal-Bench 4.0.0 leaderboard (public; downloaded with Harbor 0.24.0)
+  benchmark: Terminal-Bench 4.0, 66 tasks expected, 5 trials per task per arm (to confirm on download)
+  confirmation_arms:
+    opus_5:
+      row: d71ac3d0-da36-49cb-89d9-323136e77111
+      job: a1ac63a1-8a9b-4bc7-9906-2b63657ee1c2
+      as_listed: Claude Code 2.1.231, claude-opus-5, effort max (leaderboard), 330 trials, 6 errors
+    opus_5_5:
+      row: 7b805dbb-e77a-4d0a-892e-165f922f786c
+      job: 96ad98a5-70e6-5e7b-bd1e-67eecfbc644c
+      as_listed: Claude Code 2.1.284, claude-opus-5-5, effort max, 330 trials, 7 errors
+  exploration_arms: >
+    Fable 5 max and Fable 5.1 max, Claude Code (decided 27 Oct; downloaded 27 and 28 Oct).
+    Used to build and tune the importer, the trees, the measures and the test below. Fable
+    carries extra safety measures, so its refusal and switch counts set nothing here.
+  exploration_also_used_for: >
+    designing the tree viewer (layout, colours, replay, the all-tasks grid), which is shown
+    to a few readers before confirmation opens. Confirmation data is not used for design.
+  file_hashes: out/harbor_fetch_manifest_003.jsonl (written at download)
+  analysis_code: >
+    in the divergence repository: the importer (divergence/importers/harbor_jobs.py 0.1.1, commit 23ead68)
+    and experiments/003/code (commit 2763448): model_audit, switch_sort, u_values and u_null v2
+    (arms, output paths and equal cap as arguments; with the Fable defaults they reproduce the
+    29 Oct outputs byte for byte), cost_check, run_labels, make_share, and u7_null (superseded
+    by u_null; kept as the code behind dropping the first-split category). Each file's sha256
+    is recorded below (of the file's bytes, as shasum -a 256 prints it).
+  code_sha256:
+    # recorded 30 Oct 2026 at divergence commit 2763448, before any confirmation trial was opened
+    divergence/importers/harbor_jobs.py: 8e87b0a1752241094bd0656698b12d67c68ce7bbf64662a2d87a916cc23d3341
+    divergence/importers/harbor.py: 1abf6c31a027526489ba79877d0a34560d735106d5c16b73de2a9f6a1c181cb7
+    experiments/003/code/model_audit.py: 3b386a1ffba324e33e5f489a987369165dfb329fff68c7d89adf6099345ec0b8
+    experiments/003/code/switch_sort.py: 2f2ab11351e854138f1abdd11a7ac9dc1fe6501eb1e0a040d8d876c2f4ed7222
+    experiments/003/code/u_values.py: 9f2c16d6f60e079ddba899e78be5f00806c595851de7de5f642d05aa12a55f97
+    experiments/003/code/u_null.py: 1103872c659d5a024b18c92082b927bcfde268a83f6ea09b9bcf213d598552d7
+    experiments/003/code/cost_check.py: 13468d3016e859a49b6d9f8c7c73f8c173970a9696429e3d652f603a631e633d
+    experiments/003/code/run_labels.py: 079724ca40b70b01dd54603c58709405f509e99f16bd72a1b0c6c78af028a5aa
+    experiments/003/code/make_share.py: b8b5df08a0ca84424f496122c30ba9846d19e7e6429ec0a5655f1e70b0e67b48
+    experiments/003/code/u7_null.py: 579743d286cfa3a8b83d22a9633492541a39f25fca08ba71ece24935e31689e4
+
+settings_check:
+  # done on download, before any outcome is read
+  per_trial: model asked for, reasoning effort, Claude Code version, output cap
+    (CLAUDE_CODE_MAX_OUTPUT_TOKENS, or Claude Code's default when unset), any sub-agent
+    model setting in the agent's environment
+  rule: >
+    settings are reported per arm. If trials within an arm ran under different settings
+    (as the exploration arm did, in two rounds), they are grouped by setting and the
+    groups are reported; nothing is dropped for its settings.
+
+what_was_seen_before_writing:
+  - leaderboard rows for both confirmation arms (accuracy, effort, tokens, cost totals)
+  - the first results page of each confirmation job (about 100 of 330 trials each), read on
+    27 Oct; some per-task rewards (e.g. fin-saccr-rwa, photonic-waveguide-routing), one
+    Opus 5.5 AgentSafetyRefusalError (atrx-vep-crispr), OutputTokenExceededError in both
+  - one Opus 5 trial's trajectory page (an anonymiser task; 72 steps, $12.46)
+  - Anthropic's Opus 5.5 migration notes and Sonar's single-run Opus 5.5 evaluation
+  - the exploration arm in full (Fable 5 and Fable 5.1), from which v2's definitions and
+    v3's test come, including the same-model baseline computed on it (see reference_values)
+not_blinded: both arms' overall accuracy, token and cost totals are public
+
+confirmation:
+  change: Opus 5 to Opus 5.5, both at effort max, both in Claude Code (harness version differs)
+
+comparisons:
+  primary: >
+    as received: the upgrade as a user gets it. Every trial counts as it ran, including
+    trials that switched to another model; API errors are left out (see trial_counts).
+  fixed_checks:
+    equal_cap: >
+      if the arms' output caps differ, every question is also answered on trials run under
+      the same cap: the output cap both arms share, read in the settings check before any
+      outcome is opened and passed to the scripts as --equal-cap (64000 on the exploration
+      arm). If the arms share no cap, the check is reported as not possible.
+    own_model_only: every question is also answered on trials whose every reply, main
+      agent and sub-agents, came from the arm's own model
+  task_counts: >
+    every comparison states how many tasks it covers, and how many of those have the same
+    grade in both arms (the tasks U7 is read on). A check can thin sharply (in exploration,
+    equal cap covered 25 of 66 tasks); its verdicts are reported with its count, never alone.
+  rule: >
+    verdicts are decided on the primary comparison. If either check points the other way
+    on any question, the note says so beside that verdict, and neither check overrides it.
+
+scope:
+  primary: tasks with at least 3 counted trials in both arms
+  alongside: all tasks, every number reported for both
+  verdicts_are_decided_on: the primary scope
+
+definitions:
+  pass: verifier reward >= 1.0 in result.json
+  trial_counts: >
+    every trial counts in outcomes except API errors (an exception type naming the API),
+    which are left out of pass counts and reported apart by type. A trial that ran out of
+    output tokens counts as a fail and is marked.
+  reply_model: >
+    the model named on each reply in the trial's trajectory (main agent and sub-agents),
+    and in each sub-agent's own transcript. "<synthetic>" marks a message Claude Code wrote
+    itself, not a model, and is not counted as one.
+  switched: >
+    a trial in which any main-agent reply came from a model other than the arm's. Read from
+    every reply, never from a recorded fallback event alone (some switches record none).
+    Reported per arm: how many, to which models, at which reply, share of replies after.
+  task_grade: per arm, "every" if all counted trials passed, "never" if none did, otherwise "some"
+  grade_change: a task whose grade differs between arms; "drop" if it moves every->some, every->never or some->never
+  ending: >
+    each trial ends as exactly one of: passed; stopped by itself but failed (no exception
+    recorded); refused (stop reason refusal or AgentSafetyRefusalError); out of output tokens;
+    timed out; API error (left out of pass counts); other error (named). Switched is a mark
+    on the trial, not an ending.
+  step_key: >
+    action_category_v2, one category per tool call, consecutive repeats collapsed: inspect,
+    edit, run, verify, install, fetch, delete, delegate, done. Plan and control calls are
+    recorded but not drawn. Classifier as in note two with the v2 rules; known gaps listed
+    at freeze.
+  subagents: >
+    a sub-agent's work is folded at the delegate step that launched it: the trees are drawn
+    on the main agent, and the sub-agent's calls, tokens, cost and models are attached to that
+    step. Sub-agent work counts in run shape, tokens and cost.
+  run_shape: steps, model calls, tokens and wall-clock time per trial, from the step log, sub-agents included
+  shared_prefix: the number of steps all counted trials of a task and arm share before they first differ
+  first_split: >
+    for one task and arm, the step-key category at the first step where the counted trials
+    no longer share the same sequence. Drawn in the trees; not used in any verdict, since on
+    the exploration arm it changed about as often under the same-model baseline as between
+    the arms (it is noise at five trials).
+  path_changed: >
+    a task with the same grade in both arms whose median agent replies per trial differ by
+    1.5x or more (the larger median at least 1.5 times the smaller, the smaller taken as at
+    least 1), or whose shared prefix differs by 2 or more step-key steps. Agent replies are
+    the importer's turns: every trajectory entry that is not a user or system message.
+  single_trial_misleads: >
+    for one task, drawing one trial per arm gives a direction (better, worse, same) that
+    disagrees with the direction of the two arms' pass rates over all trials; reported as
+    the expected share over all trial pairs
+  cost: >
+    dollar cost as Harbor recorded it in each trial, sub-agents and replies by other models
+    included. Harbor prices each reply at the model that wrote it (checked on the exploration
+    arm: on switched trials the recorded cost matched per-reply pricing within a typical 0.3%
+    and 1%), so a switched trial's cost carries the other model's price; this is part of the
+    upgrade as received and is why cost is also answered on own-model trials.
+    cost per pass = total cost of counted trials / passed trials
+
+same_model_baseline:
+  # the one test every question is judged by; replaces the per-question thresholds of v1 and v2
+  method: >
+    within each task, the counted trials of both arms are pooled and shuffled into two groups
+    of the arms' sizes, 1,000 times (seed 20261027; each question draws from its own generator
+    with that seed). Each shuffle stands for running the same model twice. Every question is
+    scored on each shuffle as if the two groups were the arms. Questions over all tasks shuffle
+    every task in scope; U7 shuffles the tasks with the same grade in both real arms.
+  verdict: >
+    two-sided, three outcomes. The result is "worse than the same-model baseline" or "better
+    than the same-model baseline" when no more than 25 of the 1,000 shuffles (2.5%) reach the
+    real value on that side, and "within the same-model baseline" otherwise. Where each
+    question states no worse side, the outcomes read "above" and "below". Every verdict is
+    reported with the real value, the baseline's median and middle 95%, and the share of
+    shuffles at or below and at or above it.
+  reported_with_every_question: real value, baseline median, middle 95%, both tail shares, task count
+  code: u_null (version and sha256 at freeze)
+
+questions_to_hypotheses:
+  # each is judged by the same-model baseline, on the primary comparison
+  U1_held:
+    measure: of tasks Opus 5 passes every time, the share Opus 5.5 also passes every time
+    worse_side: lower
+    note: >
+      at five trials the baseline's range can reach 100%, in which case U1 can read worse
+      or within but not better
+  U2_drops_under_a_rise:
+    measure: the number of tasks whose grade drops, read beside the direction of the overall pass rate
+    worse_side: higher
+    note: when the baseline's median is small, U2 has little room to read better
+  U4_cost:
+    measures:
+      - cost per pass, Opus 5.5 over Opus 5 (a ratio)
+      - median tokens per trial, Opus 5.5 over Opus 5 (a ratio)
+    worse_side: higher, for each
+  U5_endings:
+    measures:
+      - stopped-by-itself-but-failed rate, Opus 5.5 minus Opus 5 (percentage points)
+      - refusals, Opus 5.5 minus Opus 5 (count)
+    worse_side: higher, for each
+    note: every refusal is also shown as an exhibit, whatever the verdict
+  U7_same_score_different_path:
+    measure: of tasks with the same grade in both arms, the share whose path changed
+    worse_side: none (a changed path is a change, not a harm); outcomes read above, within or below
+
+reported_measures:
+  # reported with the same-model baseline beside them where computed, no verdict
+  U3_one_run_misleads: >
+    the share of trial pairs, one trial per arm, that point the wrong way; it measures how
+    much a single run misleads, so it is reported as it is, not tested
+  U6_shape: agent replies per trial and tokens per reply, Opus 5.5 against Opus 5, medians
+
+reference_values:
+  # the exploration arm (Fable 5 as before, Fable 5.1 as after), from u_null on 29 Oct, to show
+  # what the test does. Nothing in the confirmation is compared against these numbers.
+  as_received:
+    tasks: 66, of which 49 same grade
+    U1: 92%; baseline median 73%, middle 95% 61% to 92%; within
+    U2: 2 drops; baseline median 6, middle 95% 2 to 10; within
+    U4_cost_per_pass: x0.66; baseline x1.01, x0.88 to x1.17; better
+    U4_tokens_per_trial: x0.75; baseline x0.99, x0.78 to x1.26; better
+    U5_stopped_but_failed: -10.1 points; baseline +0.3, -5.2 to +6.4; better
+    U5_refusals: none in either arm
+    U7: 65%; baseline median 39%, middle 95% 31% to 47%; above
+  equal_cap:
+    tasks: 25, of which 21 same grade
+    verdicts: U7 above; everything else within
+  own_model_only:
+    tasks: 53, of which 38 same grade
+    verdicts: U4 cost and tokens better; U5 stopped-but-failed better; U7 above; U1 and U2 within; no refusals
+
+exhibits:
+  rule: >
+    The trees shown in the note are chosen by rule, not by eye, among tasks where every
+    trial in both arms was written by its arm's own model: the task with the largest grade
+    drop; the task with the largest grade rise; and, among same-grade tasks whose path
+    changed, the one with the largest ratio of median steps (then the largest shared-prefix
+    difference). Every refusal is shown. Ties go to the task listed first alphabetically.
+    A task the rule would have picked but for a switched trial is named, and its switches shown.
+
+reported_descriptively_not_as_hypotheses:
+  - pass rates, pass^5 and pass@1 for each arm
+  - U3 and U6, as above
+  - settings per arm, from the settings check
+  - switches per arm: count, target models, first switched reply, tasks affected
+  - sub-agent use per arm: launches, types, models, share of tokens and cost
+  - API errors, timeouts and infrastructure errors
+  - action mix per arm
+  - dollar figures as recorded, with Anthropic's list prices on a stated date beside them
+
+intervals: >
+  Shares are also given a 90% interval from resampling tasks (2,000 resamples, seed
+  20261027), as a description of their spread. Verdicts come only from the same-model baseline.
+
+code_changes_after_opening: >
+  The step key may be tuned after confirmation opens, to label tools it has not seen.
+  Verdicts always use the step key as frozen here; a tuned key is reported beside them,
+  with U7 recomputed on it, never in place of it.
+  Scoring, the definitions and the test above will not change. Any change to the importer,
+  the model audit, the switch sort, the cost check or u_null after opening is listed in the
+  note with its hash before and after.
+
+limitations_known_now:
+  - The Claude Code version changed with the model (2.1.231 to 2.1.284); the arms compare the upgrade as a user receives it, not the model alone.
+  - The Opus 5 row page does not show its effort; it is taken from the leaderboard and checked in config.json at download.
+  - Claude Code can hand the rest of a run to another model; such trials count as received, and every question is also answered without them.
+  - Output caps can differ between arms or within one; every question is also answered at equal cap where they do.
+  - Five trials per task. The same-model baseline is wide at five trials, so a real change can read "within"; U1 and U2 in particular have little room on their better side.
+  - About seven verdicts in each of three comparisons are read at 5% each (2.5% per side); by chance alone, about one in twenty within-baseline verdicts would read better or worse. No correction is applied; the count is stated.
+  - Whether helper agents' replies are in the reply count follows the importer at commit 23ead68; it was not checked separately.
+  - Coding and system tasks in a terminal, not any buyer's own agent.
+  - Costs are as Harbor recorded them; prices changed between the models ($5/$25 to $4/$20 per million tokens).
+
+will_not_be_claimed:
+  - that any change was caused by the model alone
+  - that a refusal is a safety finding, or anything about Opus 5.5's safety
+  - why a trial switched to another model; the files record that it did, not why
+  - that Anthropic's "40% less to run" is right or wrong in general; only what these trials cost
+  - that these rates transfer to another agent, task set or domain
+  - that a result within the same-model baseline means nothing changed; only that five trials per task could not tell it from running the same model twice
+  - that a hypothesis was supported when it was not; failures are reported as failures
+
+glossary:
+  # The reader's layer. Everything a reader sees (the note, tree captions, posts, calls) uses the
+  # words on the right; the engine terms on the left stay in this file and the scripts. A term
+  # with no entry here does not appear in front of a reader.
+  rule: >
+    one name per idea, the same everywhere; numbers given as "about N in 10" or "N of 66
+    tasks" before percentages; no word on the claim-ceiling list (certify, compliant,
+    guarantee) and no claim the will_not_be_claimed list rules out.
+  terms:
+    trial:
+      say: a run
+      means: one attempt by the agent at one task, start to finish
+    arm:
+      say: Opus 5, Opus 5.5 (by name)
+      means: the model as the user picked it; never "arm" or "condition"
+    pass:
+      say: passed
+      means: the task's own checks accepted the result
+    task_grade:
+      say: passed every time, passed sometimes, never passed
+      means: what the five runs of one task did together
+    grade_change, drop:
+      say: became less reliable (or more reliable)
+      means: a task that passed every time and now only sometimes, or sometimes and now never (and the reverse)
+    as_received:
+      say: as you'd get it
+      means: every run counts as it happened, including runs another model finished
+    own_model_only:
+      say: only the runs the named model actually wrote
+      means: runs where every reply came from the model the user picked
+    equal_cap:
+      say: same output limit
+      means: only runs where both models were allowed the same longest reply
+    switched:
+      say: handed to another model partway
+      means: >
+        Claude Code passed the rest of the run to a different model and it never came back;
+        the files show that it happened, not why
+    reply_model:
+      say: the model that wrote each reply
+      means: read from every reply, not from what the run was set up to use
+    synthetic:
+      say: a message from Claude Code itself
+      means: not a model; for example the notice that a run hit the output limit
+    ending, stopped by itself but failed:
+      say: stopped on its own without passing
+      means: the agent finished without an error and believed it was done, but the task's checks failed
+    ending, refused:
+      say: declined the task
+      means: the model refused; never read as a safety finding
+    ending, out of output tokens:
+      say: hit the output limit
+      means: a reply ran past the longest reply allowed; counted as a fail
+    ending, API error:
+      say: provider error (left out)
+      means: the service failed, not the agent; left out of pass counts and reported apart
+    subagents, delegate:
+      say: helper agents it launched
+      means: the agent handed part of the work to other agents; their work is counted at the step that launched them
+    step, step_key:
+      say: a step
+      means: one action of the kind shown in the tree key
+      kinds: >
+        inspect: read files or look around; edit: change a file; run: run a program;
+        verify: run a test or check; install: install something; fetch: download something;
+        delete: delete something; delegate: hand work to a helper agent; done: finish
+    shared_prefix:
+      say: the steps all five runs take together before they split
+    first_split:
+      say: where the runs split
+      means: shown in the trees; not used to judge any result
+    path_changed:
+      say: took a noticeably different path
+      means: same result, but the typical run on one model was at least half as long again as on the other, or the runs stayed together for at least two steps more or fewer before splitting
+    run_shape:
+      say: how long and how much each run took
+      means: steps, tokens and time per run
+    cost, cost per pass:
+      say: cost per successful run
+      means: what all the runs cost, as recorded, divided by the runs that passed
+    tokens per trial:
+      say: tokens per run
+    same_model_baseline:
+      say: the same-model baseline
+      means: >
+        what you'd see if you ran the same model twice, five runs each: the differences that
+        appear by chance alone
+      read_as: >
+        "If you ran the same model twice, five runs each, about 4 in 10 tasks would already
+        take a noticeably different path. Between Fable 5 and Fable 5.1, about 2 in 3 did."
+    verdict, better or worse:
+      say: better (or worse) than running the same model twice would give
+      means: chance alone would reach this result in no more than 1 in 40 tries, on that side
+    verdict, within:
+      say: within what running the same model twice gives
+      means: >
+        five runs per task can't tell this apart from chance; it does not mean nothing changed
+    verdict, above or below (path changed):
+      say: more (or less) path change than running the same model twice gives
+    single_trial_misleads (U3):
+      say: how often one run each points the wrong way
+      means: >
+        if you tried each model once on a task, how often that pair would suggest the opposite
+        of what five runs each show
+    interval:
+      say: likely range
+      means: the spread the number would show on a different set of tasks like these
+    replay:
+      say: replay of real runs
+      means: the five runs drawn step by step, as recorded; clocked by step, not by time
